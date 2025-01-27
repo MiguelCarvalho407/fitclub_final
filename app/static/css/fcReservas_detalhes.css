@@ -1,0 +1,181 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    padding-top: 0px;
+    box-sizing: border-box;
+}
+
+.container {
+    width: 80%;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+h1 {
+    font-size: 28px;
+    color: #333;
+}
+
+h3 {
+    font-size: 24px;
+    color: #444;
+    margin-bottom: 20px;
+}
+
+.reservas-lista ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.reserva-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fafafa;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.utilizador-info {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}
+
+.status {
+    display: flex;
+    align-items: center;
+}
+
+.confirmado {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.nao-confirmado {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.confirmar-form {
+    margin-left: 10px;
+}
+
+.confirmar-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.confirmar-btn:hover {
+    background-color: #0056b3;
+}
+
+.cancelar-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.cancelar-btn:hover {
+    background-color: #c82333;
+}
+
+.voltar {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.voltar-btn {
+    font-size: 16px;
+    color: #007bff;
+    text-decoration: none;
+    padding: 10px 20px;
+    border: 2px solid #007bff;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.voltar-btn:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.lista-espera-btn{
+    font-size: 16px;
+    color: #17a2b8;
+    text-decoration: none;
+    padding: 10px 20px;
+    border: 2px solid #17a2b8;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.lista-espera-btn:hover{
+    background-color: #17a2b8;
+    color: white;
+}
+
+
+
+
+@media (max-width: 768px) {
+    .reserva-item {
+        flex-direction: column; /* Faz o item de reserva empilhar verticalmente */
+        align-items: center; /* Centraliza os itens */
+    }
+
+    .status {
+        flex-direction: column; /* O texto e o botão devem ficar em coluna */
+        align-items: center; /* Centraliza os itens */
+        text-align: center; /* Garante que o texto seja centralizado */
+        margin-bottom: 10px; /* Espaçamento entre o texto e o botão */
+    }
+
+    .confirmar-form {
+        margin-left: 0;
+        width: 100%; /* Faz com que o formulário ocupe toda a largura */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .confirmar-btn,
+    .cancelar-btn {
+        width: 100%; /* Botões de 100% de largura */
+        margin-top: 10px; /* Espaçamento entre os botões */
+    }
+
+    .confirmado,
+    .nao-confirmado {
+        font-size: 18px; /* Ajuste no tamanho da fonte para dispositivos móveis */
+        margin-bottom: 10px; /* Espaçamento entre o texto e os botões */
+    }
+}

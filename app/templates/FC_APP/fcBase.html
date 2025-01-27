@@ -1,0 +1,62 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/header.css' %}">
+    <title>FitClub</title>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="{% static 'imagens/fitclub_inverted-removebg-preview.png' %}" class="logo-foto">
+            <!-- <a href="{% url 'fcBase' %}" class="fcBase-a">FitClub</a> -->
+        </div>
+
+        <div class="hamburguer">
+            <div class="line"></div>
+            <div class="line"></div>
+            <div class="line"></div>
+        </div>
+
+        <nav class="nav-bar">
+            <ul>
+                <li>
+                    <a href="{% url 'calendario' %}">Calendario</a>
+                </li>
+                <li>
+                    <a href="{% url 'membros' %}">Membros</a>
+                </li>
+                <li>
+                    <a href="{% url 'recordes' %}">Recordes</a>
+                </li>
+                <li>
+                    <a href="{% url 'assiduidade' %}">Assiduidade</a>
+                </li>
+                <li>
+                    <a href="{% url 'definicoes' %}">Perfil</a>
+                </li>
+                <li>
+                    <a href="{% url 'logout' %}">Logout</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    {% block content %}
+        <img src="{% static 'imagens/fitclub1.png' %}" alt="fitclub" class="img-fcBase">
+    {% endblock %}
+
+    <script>
+        hamburguer = document.querySelector(".hamburguer");
+        hamburguer.onclick = function() {
+            navBar = document.querySelector(".nav-bar");
+            navBar.classList.toggle("active")
+        }
+    </script>
+
+</body>
+</html>
+

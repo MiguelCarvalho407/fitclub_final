@@ -1,0 +1,89 @@
+{% extends 'FC_APP/fcBase.html' %}
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/fcDetalheUtilizadores.css' %}">
+
+<div class="user-info-container">
+    <h1>Informações Pessoais - {{ perfil.username }}</h1>
+    <div class="perfil-grid">
+        <div class="perfil-group">
+            <label for="">Nome:</label>
+            {{ perfil.username }}
+        </div>
+        <div class="perfil-group">
+            <label for="">Email:</label>
+            {{ perfil.email }}
+        </div>
+        <div class="perfil-group">
+            <label for="">Data Nascimento:</label>
+            {{ perfil.data_nascimento }}
+        </div>
+        <div class="perfil-group">
+            <label for="">Contacto:</label>
+            {{ perfil.contacto }}
+        </div>
+        <div class="perfil-group">
+            <label for="">Morada:</label>
+            {{ perfil.morada }}
+        </div>
+        <div class="perfil-group">
+            <label for="">Localidade:</label>
+            {{ perfil.localidade }}
+        </div>
+        <div class="perfil-group">
+            <label for="">Codigo Postal:</label>
+            {{ perfil.codigo_postal }}
+        </div>
+        <div class="perfil-group">
+            <label for="">Género:</label>
+            {{ perfil.genero }}
+        </div>
+        
+        <div class="perfil-group">
+            <label for="">NIF:</label>
+            {{ perfil.nif }}
+        </div>
+        <div class="perfil-group">
+            <label for="">Pretende Recibo:</label>
+            {{ perfil.get_pretende_recibo_display }}
+        </div>
+        <div class="perfil-group">
+            <label for="">Profissão:</label>
+            {{ perfil.profissao }}
+        </div>
+        <div class="perfil-group">
+            <label for="">Classificação do Esforço na Profissão:</label>
+            {{ perfil.get_classificacao_esforco_na_profissao_display }}
+        </div>
+        <div class="perfil-group">
+            <label for="">Fumador:</label>
+            {{ perfil.get_fumador_display }}
+        </div>
+        <div class="perfil-group">
+            <label for="">Problemas de Saúde:</label>
+            {{ perfil.get_problemas_saude_display }}
+        </div>
+        <div class="perfil-group">
+            <label for="">Limitações para a Prática de Exercício Físico:</label>
+            {{ perfil.get_limitacoes_para_pratica_exercicio_fisico_display }}
+        </div>
+        <div class="perfil-group">
+            <label for="">Estado da conta:</label>
+            {{ perfil.funcao }}
+        </div>
+    </div>
+
+    <div class="button-group">
+        {% if request.user.is_staff %}
+            <a href="{% url 'editar_utilizador' perfil.id %}" class="btn-primary">Informações Pessoais</a>
+            <a href="{% url 'editardadosbiometricos' perfil.id %}" class="btn-secondary">Dados Biométricos</a>
+            <a href="{% url 'ver_recordes_utilizador' perfil.id %}" class="btn-recordes">Recordes</a>
+            <a href="{% url 'verassiduidade' perfil.id %}" class="btn-assiduidade">Assiduidade</a>
+        {% endif %}
+        <a href="{% url 'membros' %}" class="btn-voltar">Voltar à Lista</a>
+    </div>
+</div>
+
+{% endblock %}

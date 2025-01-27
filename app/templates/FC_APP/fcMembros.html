@@ -1,0 +1,35 @@
+{% extends 'FC_APP/fcBase.html' %}
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/fcMembros.css' %}">
+
+<h1>Membros</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Nome</th>
+            <th scope="col">Email</th>
+            <th scope="col">Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for utilizador in utilizadores %}
+        <tr>
+            <th>{{ utilizador.id }}</th>
+            <td>{{ utilizador.username }}</td>
+            <td>{{ utilizador.email}}</td>
+            <td><a href="{% url 'detalhe_utilizador' utilizador.id %}">Ver mais</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="informacoes-totais-container">
+    <a href="{% url 'exportar_excel' %}" class="btn-informacoes-totais">Descarregar Informações Totais</a>
+</div>
+
+{% endblock %}

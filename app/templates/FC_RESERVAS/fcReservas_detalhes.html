@@ -1,0 +1,50 @@
+{% extends 'FC_APP/fcBase.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/fcReservas_detalhes.css' %}">
+
+<div class="container reservas-container">
+    <h3>Reservas:</h3>
+    
+    <ul class="reservas-lista">
+        {% for reserva in reservas %}
+            <li class="reserva-item">
+                <div class="utilizador-info">
+                    <strong>{{ reserva.utilizador.username }}</strong>
+                </div>
+
+                <div class="status">
+                    {% if reserva.confirmado %}
+                        <span class="confirmado">Confirmado</span>
+                        <form method="post" class="confirmar-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="reservas_id" value="{{ reserva.id }}">
+                            {% if request.user.is_staff %}
+                                <button type="submit" name="action" value="cancel" class="cancelar-btn">Cancelar Confirmação</button>
+                            {% endif %}
+                        </form>
+                    {% else %}
+                        <span class="nao-confirmado">Não Confirmado</span>
+                        <form method="post" class="confirmar-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="reservas_id" value="{{ reserva.id }}">
+                            {% if request.user.is_staff %}
+                                <button type="submit" name="action" value="confirm" class="confirmar-btn">Confirmar Presença</button>
+                            {% endif %}
+                        </form>
+                    {% endif %}
+                </div>
+            </li>
+        {% empty %}
+            <li>Não há reservas para este treino.</li>
+        {% endfor %}
+    </ul>
+
+    
+    <div class="voltar">
+        <a href="{% url 'calendario' %}" class="voltar-btn">Voltar</a>
+        <a href="{% url 'listaespera' treino.id %}" class="lista-espera-btn">Lista de Espera</a>
+    </div>
+</div>
+{% endblock %}
