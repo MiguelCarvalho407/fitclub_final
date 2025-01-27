@@ -97,7 +97,7 @@ class InformacoesPessoaisForm(forms.ModelForm):
     class Meta:
         model = Utilizadores
         fields = ['email', 'username', 'data_nascimento', 'genero', 'morada', 'codigo_postal', 'localidade', 'contacto',
-                  'nif', 'pretende_recibo', 'profissao', 'classificacao_esforco_na_profissao', 'fumador', 'problemas_saude', 'limitacoes_para_pratica_exercicio_fisico']
+                  'nif', 'pretende_recibo', 'profissao', 'classificacao_esforco_na_profissao', 'fumador', 'problemas_saude', 'limitacoes_para_pratica_exercicio_fisico', 'is_staff']
         widgets = {
             'email':forms.EmailInput(attrs={
                 'readonly': 'readonly'
@@ -134,10 +134,16 @@ class InformacoesPessoaisForm(forms.ModelForm):
 
 
 class EditarInformacoesPessoaisForm(forms.ModelForm):
+    is_staff = forms.ChoiceField(
+        choices=[
+            ('True', 'Sim'),
+            ('False', 'Não'),
+        ],
+    )
     class Meta:
         model = Utilizadores
         fields = ['username', 'email', 'contacto', 'data_nascimento', 'genero', 'morada', 'codigo_postal', 'localidade', 'funcao',
-                  'nif', 'pretende_recibo', 'profissao', 'classificacao_esforco_na_profissao', 'fumador', 'problemas_saude', 'limitacoes_para_pratica_exercicio_fisico']
+                  'nif', 'pretende_recibo', 'profissao', 'classificacao_esforco_na_profissao', 'fumador', 'problemas_saude', 'limitacoes_para_pratica_exercicio_fisico', 'is_staff']
         widgets = {
             'email':forms.EmailInput(attrs={
                 'readonly': 'readonly'
@@ -157,6 +163,9 @@ class EditarInformacoesPessoaisForm(forms.ModelForm):
             'morada':forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Escreva a sua morada'
+            }),
+            'is_staff':forms.TextInput(attrs={
+                'class': 'form-control',
             })
         }
         labels = {

@@ -73,6 +73,10 @@
             <label for="">Estado da conta:</label>
             {{ perfil.funcao }}
         </div>
+        <div class="perfil-group">
+            <label for="">Permissões de Treinador:</label>
+            {{ perfil.is_staff|yesno:"Sim,Não" }}
+        </div>
     </div>
 
     <div class="button-group">
