@@ -82,6 +82,7 @@ body {
     background-color: #007BFF;
     border: none;
     cursor: pointer;
+    width: 100%;
 }
 
 .btn-secondary {

@@ -421,6 +421,9 @@ def editar_utilizador(request, user_id):
 
 @login_required
 def detalhe_utilizador(request, user_id):
+    if not request.user.is_staff:
+        return render(request, 'ERRORS/403.html')
+    
     if request.user.funcao != 'Ativo':
         return redirect('acesso_negado')
     

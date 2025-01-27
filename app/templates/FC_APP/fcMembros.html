@@ -13,7 +13,9 @@
             <th scope="col">#</th>
             <th scope="col">Nome</th>
             <th scope="col">Email</th>
-            <th scope="col">Ações</th>
+            {% if request.user.is_staff %}
+                <th scope="col">Ações</th>
+            {% endif %}
         </tr>
     </thead>
     <tbody>
@@ -22,7 +24,9 @@
             <th>{{ utilizador.id }}</th>
             <td>{{ utilizador.username }}</td>
             <td>{{ utilizador.email}}</td>
-            <td><a href="{% url 'detalhe_utilizador' utilizador.id %}">Ver mais</a></td>
+            {% if request.user.is_staff %}
+                <td><a href="{% url 'detalhe_utilizador' utilizador.id %}">Ver mais</a></td>
+            {% endif %}
         </tr>
         {% endfor %}
     </tbody>
