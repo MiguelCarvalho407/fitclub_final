@@ -19,7 +19,7 @@
         </tr>
     </thead>
     <tbody>
-        {% for utilizador in utilizadores %}
+        {% for utilizador in page_obj %}
         <tr>
             <th>{{ utilizador.id }}</th>
             <td>{{ utilizador.username }}</td>
@@ -32,8 +32,26 @@
     </tbody>
 </table>
 
-<div class="informacoes-totais-container">
-    <a href="{% url 'exportar_excel' %}" class="btn-informacoes-totais">Descarregar Informações Totais</a>
+<div class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?page=1">« Primeira</a>
+        <a href="?page={{ page_obj.previous_page_number }}">‹ Anterior</a>
+    {% endif %}
+
+    
+
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">Próxima ›</a>
+        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        <a href="?page={{ page_obj.paginator.num_pages }}">Última »</a>
+    {% endif %}
 </div>
+
+{% if request.user.is_staff %}
+    <div class="informacoes-totais-container">
+        <a href="{% url 'exportar_excel' %}" class="btn-informacoes-totais">Descarregar Informações Totais</a>
+    </div>
+{% endif %}
+
 
 {% endblock %}

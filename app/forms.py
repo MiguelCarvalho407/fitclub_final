@@ -76,7 +76,7 @@ class CriarContaForm(forms.Form):
             self.add_error('confirmar_password', 'As passwords não correspondem!')
 
         #DEFINIÇÃO DA CHAVE
-        if chave != 'Fitclubns17_2025!':
+        if chave != '123':
             self.add_error('chave', 'Chave incorreta!')
 
         return cleaned_data
@@ -117,7 +117,7 @@ class InformacoesPessoaisForm(forms.ModelForm):
             'morada':forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Escreva a sua morada'
-            })
+            }),
 
         }
         labels = {
@@ -219,6 +219,8 @@ class EditarDadosBiometricos(forms.ModelForm):
         }
 
 
+
+
 class CriarTreinoForm(forms.Form):
     tipo_treino = forms.ChoiceField(
         choices=[
@@ -281,66 +283,13 @@ class CriarTreinoForm(forms.Form):
         initial=1,  # Valor padrão: 1 hora antes
         widget=forms.Select(attrs={'class': 'form-control'}),
     )
-    dia_da_semana = forms.ChoiceField(
-        choices=[
-            ('segunda-feira', 'Segunda-feira'),
-            ('terça-feira', 'Terça-feira'),
-            ('quarta-feira', 'Quarta-feira'),
-            ('quinta-feira', 'Quinta-feira'),
-            ('sexta-feira', 'Sexta-feira'),
-            ('sábado', 'Sábado'),
-            ('domingo', 'Domingo'),
-        ],
-        label="Dia da Semana"
+    dia_da_semana = forms.MultipleChoiceField(
+        choices=Treino.DIAS_DA_SEMANA_CHOICES,
+        widget=forms.CheckboxSelectMultiple,
+        label="Dias da Semana"
     )
 
-    def clean(self):
-        cleaned_data = super().clean()
 
-        # Obter dados
-        data_inicio = cleaned_data.get('data_inicio')
-        data_fim = cleaned_data.get('data_fim')
-        hora_inicio = cleaned_data.get('hora_inicio')
-        hora_fim = cleaned_data.get('hora_fim')
-        reservas_horas_antes = cleaned_data.get('reservas_horas_antes')
-        reservas_horas_fecho = cleaned_data.get('reservas_horas_fecho')
-        max_participantes = cleaned_data.get('max_participantes')
-        max_lista_espera = cleaned_data.get('max_lista_espera')
-
-        # Converter valores de abertura e fechamento para inteiros
-        try:
-            reservas_horas_antes = int(reservas_horas_antes)
-            reservas_horas_fecho = int(reservas_horas_fecho)
-            cleaned_data['reservas_horas_antes'] = reservas_horas_antes
-            cleaned_data['reservas_horas_fecho'] = reservas_horas_fecho
-        except (ValueError, TypeError):
-            raise forms.ValidationError("Os valores de 'Abertura' e 'Fechamento' devem ser números válidos.")
-
-        # Validações
-        if reservas_horas_antes < 0:
-            raise forms.ValidationError("O número de horas antes deve ser maior ou igual a 0.")
-
-        if reservas_horas_fecho < 0:
-            raise forms.ValidationError("O fechamento das reservas deve ser maior ou igual a 0.")
-
-        if reservas_horas_fecho >= reservas_horas_antes:
-            raise forms.ValidationError(
-                "O fechamento das reservas deve ocorrer antes do período de abertura."
-            )
-
-        if data_inicio and data_fim and data_inicio > data_fim:
-            raise forms.ValidationError("A data de início deve ser anterior ou igual à data de fim.")
-
-        if hora_inicio and hora_fim and hora_inicio >= hora_fim:
-            raise forms.ValidationError("A hora de início deve ser anterior à hora de fim.")
-
-        if max_participantes is not None and max_participantes <= 0:
-            raise forms.ValidationError("O número máximo de participantes deve ser maior que 0.")
-
-        if max_lista_espera is not None and max_lista_espera < 0:
-            raise forms.ValidationError("O número máximo de participantes na lista de espera deve ser maior ou igual a 0.")
-
-        return cleaned_data
     
 
 

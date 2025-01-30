@@ -49,6 +49,7 @@
     </header>
 
     {% block content %}
+        <h2 class="bvd-utilizador">Bem Vindo, {{ user.username }}</h2>
         <img src="{% static 'imagens/fitclub1.png' %}" alt="fitclub" class="img-fcBase">
     {% endblock %}
 

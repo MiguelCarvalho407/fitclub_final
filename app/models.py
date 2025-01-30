@@ -133,7 +133,6 @@ class Treino(models.Model):
         ('treino_funcional', 'Treino Funcional'),
         ('mobilidade', 'Mobilidade'),
         ('força', 'Força'),
-        ('mobilidade', 'Mobilidade'),
         ('total_fit', 'Total FIT'),
     ]
 
@@ -159,12 +158,10 @@ class Treino(models.Model):
     hora_inicio = models.TimeField()
     hora_fim = models.TimeField()
     dia_da_semana = models.CharField(max_length=20, choices=DIAS_DA_SEMANA_CHOICES)
-    dia_semana_num = models.IntegerField(editable=False, null=True, blank=True)
     max_participantes = models.PositiveIntegerField(null=False, blank=False, default=0)
     max_lista_espera = models.PositiveIntegerField(null=False, blank=False, default=0)
     reservas_horas_antes = models.PositiveIntegerField(default=24, choices=RESERVAS_HORAS_ANTES_CHOICES)
     reservas_horas_fecho = models.IntegerField(default=1, choices=RESERVAS_HORAS_FECHO_CHOICES)
-
 
     def reservas_abertas(self):
         now = timezone.now()
@@ -176,25 +173,11 @@ class Treino(models.Model):
         
         # Retorna True se o horário atual estiver no intervalo de abertura e fechamento
         return abertura_reservas <= now <= fechamento_reservas
-    
-    
-
-    def save(self, *args, **kwargs):
-        # Mapear dias da semana para números
-        dia_semana_map = {
-            'segunda-feira': 0,
-            'terça-feira': 1,
-            'quarta-feira': 2,
-            'quinta-feira': 3,
-            'sexta-feira': 4,
-            'sábado': 5,
-            'domingo': 6,
-        }
-        self.dia_semana_num = dia_semana_map[self.dia_da_semana]
-        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.get_tipo_treino_display()} - {self.dia_da_semana}"
+
+
 
 
 

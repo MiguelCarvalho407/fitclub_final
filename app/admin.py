@@ -9,5 +9,3 @@ admin.site.register(Dados_biometricos)
 admin.site.register(ListaEspera)
 admin.site.register(Recordes)
 admin.site.register(RecordesNomes)
-
-

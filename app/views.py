@@ -22,9 +22,11 @@ from calendar import monthrange
 from math import ceil
 import openpyxl
 from django.http import HttpResponse
+from django.core.paginator import Paginator
+
+
 
 # PÁGINA DE ERRO 404 #
-
 def custom_404(request, exception):
     return render(request, 'ERRORS/404.html', status=404)
 
@@ -144,6 +146,10 @@ def fcBase(request):
         return redirect('acesso_negado')
     return render(request, 'FC_APP/fcBase.html')
 
+
+
+
+
 @login_required
 def criar_treinos(request):
     if not request.user.is_staff:
@@ -159,38 +165,40 @@ def criar_treinos(request):
             hora_fim = form.cleaned_data['hora_fim']
             max_participantes = form.cleaned_data['max_participantes']
             max_lista_espera = form.cleaned_data['max_lista_espera']
-            dia_da_semana = form.cleaned_data['dia_da_semana']
+            dias_da_semana = form.cleaned_data['dia_da_semana']
             reservas_horas_antes = form.cleaned_data['reservas_horas_antes']
             reservas_horas_fecho = form.cleaned_data['reservas_horas_fecho']
 
-            # Mapeia o dia da semana para números
-            dia_semana_map = {
-                'segunda-feira': 0,
-                'terça-feira': 1,
-                'quarta-feira': 2,
-                'quinta-feira': 3,
-                'sexta-feira': 4,
-                'sábado': 5,
-                'domingo': 6,
-            }
-            dia_semana_num = dia_semana_map[dia_da_semana]
 
             # Gera os treinos para os dias especificados
             current_date = data_inicio
             while current_date <= data_fim:
-                if current_date.weekday() == dia_semana_num:
-                    Treino.objects.create(
-                        tipo_treino=tipo_treino,
-                        data_inicio=current_date,
-                        data_fim=current_date,  # Mesma data para treino de 1 dia
-                        hora_inicio=hora_inicio,
-                        hora_fim=hora_fim,
-                        max_participantes=max_participantes,
-                        max_lista_espera=max_lista_espera,
-                        dia_da_semana=dia_da_semana,
-                        reservas_horas_antes=reservas_horas_antes,
-                        reservas_horas_fecho=reservas_horas_fecho,
-                    )
+                for dia_da_semana in dias_da_semana:
+
+                    dia_semana_map = {
+                        'segunda-feira': 0,
+                        'terça-feira': 1,
+                        'quarta-feira': 2,
+                        'quinta-feira': 3,
+                        'sexta-feira': 4,
+                        'sábado': 5,
+                        'domingo': 6,
+                    }
+
+                    if current_date.weekday() == dia_semana_map[dia_da_semana]:
+
+                        Treino.objects.create(
+                            tipo_treino=tipo_treino,
+                            data_inicio=current_date,
+                            data_fim=current_date,  # Mesma data para treino de 1 dia
+                            hora_inicio=hora_inicio,
+                            hora_fim=hora_fim,
+                            max_participantes=max_participantes,
+                            max_lista_espera=max_lista_espera,
+                            dia_da_semana=dia_da_semana,
+                            reservas_horas_antes=reservas_horas_antes,
+                            reservas_horas_fecho=reservas_horas_fecho,
+                        )
                 current_date += timedelta(days=1)
 
             return redirect('calendario')
@@ -199,6 +207,10 @@ def criar_treinos(request):
         form = CriarTreinoForm()
 
     return render(request, 'FC_APP/fcCriar_treino.html', {'form': form})
+
+
+
+
 
 
 
@@ -222,7 +234,7 @@ def calendario(request):
     if request.user.funcao != 'Ativo':
         return redirect('acesso_negado')
     
-    treinos = Treino.objects.all()
+    treinos = Treino.objects.all().order_by('hora_inicio')
     current_datetime = timezone.now()  # Data e hora atual com timezone
 
     for treino in treinos:
@@ -394,7 +406,12 @@ def membros(request):
         return redirect('acesso_negado')
     
     utilizadores = Utilizadores.objects.all()
-    return render(request, 'FC_APP/fcMembros.html', {'utilizadores': utilizadores})
+
+    paginator = Paginator(utilizadores, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'FC_APP/fcMembros.html', {'page_obj': page_obj})
 
 
 @login_required
@@ -423,7 +440,7 @@ def editar_utilizador(request, user_id):
 def detalhe_utilizador(request, user_id):
     if not request.user.is_staff:
         return render(request, 'ERRORS/403.html')
-    
+
     if request.user.funcao != 'Ativo':
         return redirect('acesso_negado')
     

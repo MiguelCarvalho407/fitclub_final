@@ -21,6 +21,11 @@ header{
     padding: 0 100px;
 }
 
+.bvd-utilizador{
+    text-align: center;
+    margin-top: 25vh;
+}
+
 .logo{
     font-size: 28px;
     font-weight: bold;
@@ -144,6 +149,11 @@ header{
 
     .nav-bar ul li a{
         margin-bottom: 12px;
+    }
+
+    .bvd-utilizador{
+        text-align: center;
+        margin-top: 20vh;
     }
 }
 

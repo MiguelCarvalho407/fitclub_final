@@ -33,10 +33,12 @@
 <div id="modal" class="modal hidden">
     <div class="modal-content">
         <span class="close" style="margin-left: 98%; cursor: pointer; font-size: 20px;">&times;</span>
-        <h2 class="modal-title">Detalhes do Treino</h2>
+        <h2 class="modal-title">
+            Detalhes do Treino {{ treino.tipo_treino }} ({{ treino.hora_inicio }} - {{ treino.hora_fim }})
+        </h2>
         <div class="modal-body">
             <div class="modal-info">
-                <label class="modal-label">Dia da Semana:</label>
+                <!-- <label class="modal-label">Dia da Semana:</label> -->
                 <span class="modal-data" id="modal-dia-semana"></span>
             </div>
             <div class="modal-info">
@@ -61,6 +63,8 @@
             </div>
         </div>
         <div class="modal-actions">
+            <button id="prev-treino" class="btn btn-secondary">◀</button>
+            <button id="next-treino" class="btn btn-secondary">▶</button>
             <a id="reservar-link" href="#" class="btn btn-primary">Reservar</a>
             <a id="detalhes-link" href="#" class="btn btn-secondary">Ver Detalhes</a>
             {% if request.user.is_staff %}
@@ -73,155 +77,174 @@
 
 <script>
     let currentDate = new Date();
-    const daysContainer = document.getElementById("days");
-    const monthYearHeader = document.getElementById("month-year");
-    const prevButton = document.getElementById("prev");
-    const nextButton = document.getElementById("next");
+const daysContainer = document.getElementById("days");
+const monthYearHeader = document.getElementById("month-year");
+const prevButton = document.getElementById("prev");
+const nextButton = document.getElementById("next");
 
-    // Dados dos treinos passados pelo Django
-    const treinos = JSON.parse('{{ treinos_json|safe }}');
+// Dados dos treinos passados pelo Django
+const treinos = JSON.parse('{{ treinos_json|safe }}');
 
-    // Elementos do modal
-    const modal = document.getElementById("modal");
-    const closeModalButtons = document.querySelectorAll(".close, .close-popup-btn");
-    const modalDiaSemana = document.getElementById("modal-dia-semana");
-    const modalData = document.getElementById("modal-data");
-    const modalHoraInicio = document.getElementById("modal-hora-inicio");
-    const modalHoraFim = document.getElementById("modal-hora-fim");
-    const modalTipoTreino = document.getElementById("modal-tipo-treino");
-    const modalMaxParticipantes = document.getElementById("modal-max-participantes");
+// Elementos do modal
+const modal = document.getElementById("modal");
+const closeModalButtons = document.querySelectorAll(".close, .close-popup-btn");
+const modalDiaSemana = document.getElementById("modal-dia-semana");
+const modalData = document.getElementById("modal-data");
+const modalHoraInicio = document.getElementById("modal-hora-inicio");
+const modalHoraFim = document.getElementById("modal-hora-fim");
+const modalTipoTreino = document.getElementById("modal-tipo-treino");
+const modalMaxParticipantes = document.getElementById("modal-max-participantes");
 
-    const reservarLink = document.getElementById("reservar-link");
-    const detalhesLink = document.getElementById("detalhes-link");
+const reservarLink = document.getElementById("reservar-link");
+const detalhesLink = document.getElementById("detalhes-link");
 
-    // Função para abrir o modal com os dados do treino
-    function openModal(treino) {
-        const date = new Date(treino.data_inicio);
-        const now = new Date();
-        
-        const editarLink = document.querySelector("#editar-link");
-        if (editarLink) {
-            editarLink.href = `/fitclub/editar_treino/${treino.id}/`;
-        }
+// Variáveis para controle dos treinos no modal
+let treinoIndex = 0;
+let treinosDoDia = [];
+
+// Função para abrir o modal com os dados do treino
+function openModal(treino) {
+    // Filtra os treinos do dia para mostrar no modal
+    const date = new Date(treino.data_inicio);
+    treinosDoDia = treinos.filter(t => {
+        const treinoDate = new Date(t.data_inicio);
+        return treinoDate.getDate() === date.getDate() && treinoDate.getMonth() === date.getMonth() && treinoDate.getFullYear() === date.getFullYear();
+    });
+
+    // Define o índice do treino
+    treinoIndex = treinosDoDia.indexOf(treino);
+
+    // Atualiza o modal com o treino atual
+    updateModal(treino);
+    modal.classList.remove("hidden");
+}
+
+// Função para atualizar o conteúdo do modal
+function updateModal(treino) {
+    const date = new Date(treino.data_inicio);
+
+    document.querySelector(".modal-title").textContent = 
+        `${treino.tipo_treino} - (${treino.hora_inicio} - ${treino.hora_fim})`;
     
-        const apagarLink = document.querySelector("#apagar-link");
-        if (apagarLink) {
-            apagarLink.href = `/fitclub/apagartreino/${treino.id}/`;
-        }
-    
-        modal.classList.remove("hidden");
-    
-        const treinoDatetime = new Date(
-            date.getFullYear(),
-            date.getMonth(),
-            date.getDate(),
-            parseInt(treino.hora_inicio.split(':')[0]),
-            parseInt(treino.hora_inicio.split(':')[1])
-        );
-    
-        modalDiaSemana.textContent = date.toLocaleDateString("pt-BR", { weekday: "long" });
-        modalData.textContent = date.toLocaleDateString("pt-BR");
-        modalHoraInicio.textContent = treino.hora_inicio;
-        modalHoraFim.textContent = treino.hora_fim;
-        modalTipoTreino.textContent = treino.tipo_treino;
-        modalMaxParticipantes.textContent = treino.max_participantes || "N/A";
-    
-        const isPast = now > treinoDatetime;
-        if (treino.user_reserved) {
-            reservarLink.textContent = "Cancelar Reserva";
-            reservarLink.classList.remove("btn-verde");
-            reservarLink.classList.add("btn-vermelho");
-        } else {
-            reservarLink.textContent = "Reservar";
-            reservarLink.classList.remove("btn-vermelho");
-            reservarLink.classList.add("btn-verde");
-        }
-    
-        if (isPast) {
-            reservarLink.classList.add("btn-disabled");
-            reservarLink.style.pointerEvents = "none";
-        } else {
-            reservarLink.classList.remove("btn-disabled");
-            reservarLink.style.pointerEvents = "auto";
-        }
-    
-        reservarLink.href = treino.reservar_url;
-        detalhesLink.href = treino.detalhes_url;
+    modalDiaSemana.textContent = date.toLocaleDateString("pt-BR", { weekday: "long" });
+    modalData.textContent = date.toLocaleDateString("pt-BR");
+    modalHoraInicio.textContent = treino.hora_inicio;
+    modalHoraFim.textContent = treino.hora_fim;
+    modalTipoTreino.textContent = treino.tipo_treino;
+    modalMaxParticipantes.textContent = treino.max_participantes || "N/A";
+
+    const isPast = new Date() > new Date(treino.data_inicio);
+    if (treino.user_reserved) {
+        reservarLink.textContent = "Cancelar Reserva";
+        reservarLink.classList.remove("btn-verde");
+        reservarLink.classList.add("btn-vermelho");
+    } else {
+        reservarLink.textContent = "Reservar";
+        reservarLink.classList.remove("btn-vermelho");
+        reservarLink.classList.add("btn-verde");
     }
 
-    // Fechar o modal
-    closeModalButtons.forEach(button => {
-        button.addEventListener("click", () => {
-            modal.classList.add("hidden");
+    if (isPast) {
+        reservarLink.classList.add("btn-disabled");
+        reservarLink.style.pointerEvents = "none";
+    } else {
+        reservarLink.classList.remove("btn-disabled");
+        reservarLink.style.pointerEvents = "auto";
+    }
+
+    reservarLink.href = treino.reservar_url;
+    detalhesLink.href = treino.detalhes_url;
+}
+
+// Função para navegar para o treino anterior
+function showPrevTreino() {
+    if (treinoIndex > 0) {
+        treinoIndex--;
+        updateModal(treinosDoDia[treinoIndex]);
+    }
+}
+
+// Função para navegar para o próximo treino
+function showNextTreino() {
+    if (treinoIndex < treinosDoDia.length - 1) {
+        treinoIndex++;
+        updateModal(treinosDoDia[treinoIndex]);
+    }
+}
+
+// Fechar o modal
+closeModalButtons.forEach(button => {
+    button.addEventListener("click", () => {
+        modal.classList.add("hidden");
+    });
+});
+
+// Navegação entre os treinos no modal
+document.getElementById("prev-treino").addEventListener("click", showPrevTreino);
+document.getElementById("next-treino").addEventListener("click", showNextTreino);
+
+// Renderizar o calendário
+function renderCalendar() {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+
+    const firstDayOfMonth = new Date(year, month, 1).getDay();
+    const lastDateOfMonth = new Date(year, month + 1, 0).getDate();
+
+    monthYearHeader.textContent = `${currentDate.toLocaleDateString("pt-BR", {
+        month: "long",
+        year: "numeric",
+    })}`;
+
+    daysContainer.innerHTML = "";
+
+    // Adiciona espaços em branco antes do primeiro dia do mês
+    for (let i = 0; i < (firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1); i++) {
+        daysContainer.innerHTML += `<div class="day empty"></div>`;
+    }
+
+    // Preenche os dias do mês
+    for (let day = 1; day <= lastDateOfMonth; day++) {
+        const today = new Date().toDateString() === new Date(year, month, day).toDateString();
+        const dayElement = document.createElement("div");
+        dayElement.classList.add("day");
+        if (today) dayElement.classList.add("today");
+
+        dayElement.innerHTML = `<span>${day}</span>`;
+
+        // Verifica se há treinos para esse dia
+        const treinoDoDia = treinos.filter(t => {
+            const treinoDate = new Date(t.data_inicio);
+            return treinoDate.getDate() === day && treinoDate.getMonth() === month && treinoDate.getFullYear() === year;
         });
-    });
 
-    // Renderizar o calendário
-    function renderCalendar() {
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-
-        const firstDayOfMonth = new Date(year, month, 1).getDay();
-        const lastDateOfMonth = new Date(year, month + 1, 0).getDate();
-
-        monthYearHeader.textContent = `${currentDate.toLocaleDateString("pt-BR", {
-            month: "long",
-            year: "numeric",
-        })}`;
-
-        daysContainer.innerHTML = "";
-
-        // Adiciona espaços em branco antes do primeiro dia do mês
-        for (let i = 0; i < (firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1); i++) {
-            daysContainer.innerHTML += `<div class="day empty"></div>`;
+        if (treinoDoDia.length > 0) {
+            const verTreinoButton = document.createElement("button");
+            verTreinoButton.classList.add("btn-ver-treinos");
+            verTreinoButton.innerHTML = "Ver Treinos do Dia";
+            verTreinoButton.addEventListener("click", () => openModal(treinoDoDia[0])); // Passa o primeiro treino
+            dayElement.appendChild(verTreinoButton);
         }
 
-        // Preenche os dias do mês
-        for (let day = 1; day <= lastDateOfMonth; day++) {
-            const today = new Date().toDateString() === new Date(year, month, day).toDateString();
-            const dayElement = document.createElement("div");
-            dayElement.classList.add("day");
-            if (today) dayElement.classList.add("today");
-
-            dayElement.innerHTML = `<span>${day}</span>`;
-
-            // Verifica se há treinos para esse dia
-            const treinoDoDia = treinos.filter(t => {
-                const treinoDate = new Date(t.data_inicio);
-                return treinoDate.getDate() === day && treinoDate.getMonth() === month && treinoDate.getFullYear() === year;
-            });
-
-            treinoDoDia.forEach(treino => {
-                const treinoElement = document.createElement("div");
-                treinoElement.classList.add("event");
-            
-                // Verifica se o treino foi reservado pelo usuário
-                if (treino.user_reserved) {
-                    treinoElement.classList.add("reserved"); // Adiciona a classe reserved
-                }
-            
-                treinoElement.innerHTML = `${treino.hora_inicio} - ${treino.tipo_treino}`;
-                treinoElement.addEventListener("click", () => openModal(treino));
-                dayElement.appendChild(treinoElement);
-            });
-
-            daysContainer.appendChild(dayElement);
-        }
+        daysContainer.appendChild(dayElement);
     }
+}
 
-    // Navegação entre meses
-    prevButton.addEventListener("click", () => {
-        currentDate.setMonth(currentDate.getMonth() - 1);
-        renderCalendar();
-    });
-
-    nextButton.addEventListener("click", () => {
-        currentDate.setMonth(currentDate.getMonth() + 1);
-        renderCalendar();
-    });
-
-    // Renderiza o calendário ao carregar a página
+// Navegação entre meses
+prevButton.addEventListener("click", () => {
+    currentDate.setMonth(currentDate.getMonth() - 1);
     renderCalendar();
+});
+
+nextButton.addEventListener("click", () => {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderCalendar();
+});
+
+// Renderiza o calendário ao carregar a página
+renderCalendar();
+
+
 </script>
 
 {% endblock %}
