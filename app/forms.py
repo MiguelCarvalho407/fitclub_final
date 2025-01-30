@@ -76,7 +76,7 @@ class CriarContaForm(forms.Form):
             self.add_error('confirmar_password', 'As passwords não correspondem!')
 
         #DEFINIÇÃO DA CHAVE
-        if chave != '123':
+        if chave != 'Fitclubns17_2025!':
             self.add_error('chave', 'Chave incorreta!')
 
         return cleaned_data
