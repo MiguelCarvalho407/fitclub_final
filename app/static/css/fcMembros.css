@@ -86,14 +86,16 @@ h1 {
 
 
 .pagination {
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
     margin-top: 20px;
 }
 
 .pagination a {
-    display: inline-block;
-    padding: 8px 12px;
-    margin: 0 5px;
+    padding: 5px 15px;
     text-decoration: none;
     background: #007bff;
     color: white;
@@ -101,17 +103,11 @@ h1 {
     font-weight: bold;
 }
 
-.pagination a:hover {
-    background: #0056b3;
-}
-
 .pagination span {
     font-size: 16px;
     font-weight: bold;
     margin: 0 10px;
 }
-
-
 
 
 @media (max-width: 600px) {
@@ -126,5 +122,21 @@ h1 {
     .table thead th, .table tbody td {
         font-size: 0.85rem;
         padding: 8px;
+    }
+
+    .pagination {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .pagination a {
+        width: 75%; /* Ocupa toda a largura disponível */
+        text-align: center;
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    .pagination span {
+        font-size: 14px;
     }
 }

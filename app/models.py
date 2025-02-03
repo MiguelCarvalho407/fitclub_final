@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
+from django.core.exceptions import ValidationError
 
 
 class Utilizadores(AbstractUser):
@@ -83,6 +84,20 @@ class Utilizadores(AbstractUser):
         related_query_name='utilizadores',
     )
 
+    def clean(self):
+        super().clean()
+        email = self.email
+        if '@' not in email:
+            raise ValidationError({'email': "O e-mail deve conter um '@'."})
+        
+        domain = email.split('@')[-1]
+        if '.' not in domain:
+            raise ValidationError({'email': "O domínio do e-mail parece inválido."})
+        
+        allowed_domains = ['gmail.com', 'yahoo.com', 'hotmail.com']
+        if domain not in allowed_domains:
+            raise ValidationError({'email': f"Domínio '{domain}' não é permitido."})
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 
@@ -162,6 +177,7 @@ class Treino(models.Model):
     max_lista_espera = models.PositiveIntegerField(null=False, blank=False, default=0)
     reservas_horas_antes = models.PositiveIntegerField(default=24, choices=RESERVAS_HORAS_ANTES_CHOICES)
     reservas_horas_fecho = models.IntegerField(default=1, choices=RESERVAS_HORAS_FECHO_CHOICES)
+    participantes = models.ManyToManyField(Utilizadores, related_name='treinos_participados', blank=True)
 
     def reservas_abertas(self):
         now = timezone.now()

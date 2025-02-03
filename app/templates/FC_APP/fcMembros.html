@@ -12,8 +12,8 @@
         <tr>
             <th scope="col">#</th>
             <th scope="col">Nome</th>
-            <th scope="col">Email</th>
             {% if request.user.is_staff %}
+                <th scope="col">Email</th>
                 <th scope="col">Ações</th>
             {% endif %}
         </tr>
@@ -23,8 +23,8 @@
         <tr>
             <th>{{ utilizador.id }}</th>
             <td>{{ utilizador.username }}</td>
-            <td>{{ utilizador.email}}</td>
             {% if request.user.is_staff %}
+                <td>{{ utilizador.email}}</td>
                 <td><a href="{% url 'detalhe_utilizador' utilizador.id %}">Ver mais</a></td>
             {% endif %}
         </tr>
@@ -36,13 +36,13 @@
     {% if page_obj.has_previous %}
         <a href="?page=1">« Primeira</a>
         <a href="?page={{ page_obj.previous_page_number }}">‹ Anterior</a>
+        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
     {% endif %}
 
     
 
     {% if page_obj.has_next %}
         <a href="?page={{ page_obj.next_page_number }}">Próxima ›</a>
-        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
         <a href="?page={{ page_obj.paginator.num_pages }}">Última »</a>
     {% endif %}
 </div>

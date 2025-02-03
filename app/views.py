@@ -23,7 +23,7 @@ from math import ceil
 import openpyxl
 from django.http import HttpResponse
 from django.core.paginator import Paginator
-
+from django.contrib.auth import update_session_auth_hash
 
 
 # PÁGINA DE ERRO 404 #
@@ -87,6 +87,27 @@ def dologin(request):
     else:
         form = LoginForm()
     return render(request, 'CONTAS/login.html', {'form': form})
+
+
+
+@login_required
+def alterar_senha(request):
+    if request.method == "POST":
+        form = AlterarSenhaForm(user=request.user, data=request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Mantém o usuário logado após a mudança de senha
+            return redirect('alterar_senha_concluido')
+    else:
+        form = AlterarSenhaForm(user=request.user)
+    
+    return render(request, 'alterar_senha.html', {'form': form})
+
+@login_required
+def alterar_senha_concluido(request):
+    return render(request, 'alterar_senha_concluido.html')
+
+
 
 
 def logout_view(request):
@@ -579,6 +600,49 @@ def reservas(request, treino_id):
         'reservas': reservas_confirmadas,
         'lista_espera': lista_espera,
     })
+
+
+
+
+
+
+
+
+@login_required
+def adicionar_utilizador_treino(request, treino_id):
+    if request.user.funcao != 'Ativo':
+        return redirect('acesso_negado')
+    
+    if not request.user.is_staff:
+        return render(request, 'ERRORS/403.html')
+        
+    treino = get_object_or_404(Treino, id=treino_id)
+    
+    if request.method == 'POST':
+        usuario_id = request.POST.get('usuario_id')
+        usuario = get_object_or_404(Utilizadores, id=usuario_id)
+        
+        # Verifica se já existe uma reserva para este utilizador e treino
+        reserva, created = Reservas.objects.get_or_create(
+            utilizador=usuario,
+            treino=treino,
+            defaults={'confirmado': False}  # Define a reserva como confirmada
+        )
+        
+        if not created:
+            reserva.confirmado = False
+            reserva.save()
+        
+        return redirect('reservas_detalhes', treino_id=treino.id)
+    
+    usuarios = Utilizadores.objects.all()
+    return render(request, 'adicionar_utilizador_treino.html', {'treino': treino, 'usuarios': usuarios})
+
+
+
+
+
+
 
 
 

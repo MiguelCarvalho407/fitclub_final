@@ -45,6 +45,7 @@
     <div class="voltar">
         <a href="{% url 'calendario' %}" class="voltar-btn">Voltar</a>
         <a href="{% url 'listaespera' treino.id %}" class="lista-espera-btn">Lista de Espera</a>
+        <a href="{% url 'adicionar_utilizador_treino' treino.id %}">Adicionar Utilizador</a>
     </div>
 </div>
 {% endblock %}

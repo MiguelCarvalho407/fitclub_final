@@ -28,6 +28,8 @@ urlpatterns = [
     path('reservas/<int:treino_id>/', views.reservas, name='reservas'),
 
 
+    path('treino/<int:treino_id>/adicionar_utilizador/', views.adicionar_utilizador_treino, name='adicionar_utilizador_treino'),
+
     #CRUD
     path('fitclub/editar_treino/<int:treino_id>/', views.editar_treino, name='editar_treino'),
     path('fitclub/apagartreino/<int:pk>/', views.apagartreino, name='apagartarefa'),
@@ -46,6 +48,11 @@ urlpatterns = [
     path('exportar_excel/', views.export_to_excel, name='exportar_excel'),
     # EXPORTA OS DADOS DE UM UTILIZADOR ESPECIFICO
     path('exportar_utilizador/<int:user_id>/', views.export_user_data_to_excel, name='exportar_utilizador'),
+
+
+    path('alterar_senha/', views.alterar_senha, name='alterar_senha'),
+    path('alterar_senha_concluido/', views.alterar_senha_concluido, name='alterar_senha_concluido'),
+
 
 ]
 

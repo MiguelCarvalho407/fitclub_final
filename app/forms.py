@@ -2,6 +2,9 @@ from django import forms
 from django.forms import ModelForm
 from .models import *
 import re
+from django.contrib.auth.forms import PasswordChangeForm
+import dns.resolver
+
 
 
 class CriarContaForm(forms.Form):
@@ -63,6 +66,32 @@ class CriarContaForm(forms.Form):
         'class': 'form-control'
     }))
 
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+
+        if email:
+            try:
+                nome, dominio = email.split('@')
+
+                # Consulta registros MX para o domínio
+                registros_mx = dns.resolver.resolve(dominio, 'MX')
+
+                # Se não houver registros MX, o domínio não tem servidor de e-mail
+                if not registros_mx:
+                    raise ValidationError(f"'{dominio}' não é válido.")
+
+            except dns.resolver.NXDOMAIN:
+                raise ValidationError(f"O domínio '{dominio}' não é válido.")
+
+            except dns.resolver.NoAnswer:
+                raise ValidationError(f"'{dominio}' não é válido.")
+
+            except dns.exception.Timeout:
+                raise ValidationError("Erro ao verificar o e-mail. Tente novamente mais tarde.")
+
+        return email
+
+
     def clean(self):
         cleaned_data = super().clean()
         password = cleaned_data.get('password')
@@ -76,7 +105,7 @@ class CriarContaForm(forms.Form):
             self.add_error('confirmar_password', 'As passwords não correspondem!')
 
         #DEFINIÇÃO DA CHAVE
-        if chave != 'Fitclubns17_2025!':
+        if chave != '123':
             self.add_error('chave', 'Chave incorreta!')
 
         return cleaned_data
@@ -93,11 +122,28 @@ class LoginForm(forms.Form):
     }))
 
 
+class AlterarSenhaForm(PasswordChangeForm):
+    old_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password Atual'}),
+        label=''
+    )
+    new_password1 = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Nova Password'}),
+        label=''
+    )
+    new_password2 = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirmar Password'}),
+        label=''
+    )
+
+
+
+
 class InformacoesPessoaisForm(forms.ModelForm):
     class Meta:
         model = Utilizadores
         fields = ['email', 'username', 'data_nascimento', 'genero', 'morada', 'codigo_postal', 'localidade', 'contacto',
-                  'nif', 'pretende_recibo', 'profissao', 'classificacao_esforco_na_profissao', 'fumador', 'problemas_saude', 'limitacoes_para_pratica_exercicio_fisico', 'is_staff']
+                  'nif', 'pretende_recibo', 'profissao', 'classificacao_esforco_na_profissao', 'fumador', 'problemas_saude', 'limitacoes_para_pratica_exercicio_fisico']
         widgets = {
             'email':forms.EmailInput(attrs={
                 'readonly': 'readonly'

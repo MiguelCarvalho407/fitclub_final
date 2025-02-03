@@ -18,7 +18,7 @@ header{
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 100px;
+    padding: 0 20px;
 }
 
 .bvd-utilizador{
@@ -89,7 +89,12 @@ header{
 
 /* ------------------------------ */
 
-
+@media only screen and  (max-width: 1366px){
+    .bvd-utilizador{
+        text-align: center;
+        margin-top: 20vh;
+    }
+}
 
 
 @media only screen and  (max-width: 1320px){
