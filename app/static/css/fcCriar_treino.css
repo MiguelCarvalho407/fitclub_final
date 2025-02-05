@@ -7,6 +7,15 @@ body {
     background-color: #f3f4f6;
 }
 
+.messages-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    color: red;
+    margin-bottom: 20px;
+}
+
 .training-container-alt {
     max-width: 1000px;
     margin: 40px auto;

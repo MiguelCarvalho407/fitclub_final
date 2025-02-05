@@ -190,12 +190,13 @@ def criar_treinos(request):
             reservas_horas_antes = form.cleaned_data['reservas_horas_antes']
             reservas_horas_fecho = form.cleaned_data['reservas_horas_fecho']
 
+            # Mapeamento para exibição legível do tipo de treino
+            TIPOS_TREINO_DISPLAY = dict(Treino.TIPO_TREINO_CHOICES)
+            tipo_treino_display = TIPOS_TREINO_DISPLAY.get(tipo_treino, tipo_treino)  # Fallback para segurança
 
-            # Gera os treinos para os dias especificados
             current_date = data_inicio
             while current_date <= data_fim:
                 for dia_da_semana in dias_da_semana:
-
                     dia_semana_map = {
                         'segunda-feira': 0,
                         'terça-feira': 1,
@@ -207,11 +208,23 @@ def criar_treinos(request):
                     }
 
                     if current_date.weekday() == dia_semana_map[dia_da_semana]:
+                        # Verifica se já existe um treino com o mesmo tipo e horário
+                        if Treino.objects.filter(
+                            tipo_treino=tipo_treino,
+                            data_inicio=current_date,
+                            hora_inicio=hora_inicio
+                        ).exists():
+                            messages.error(
+                                request, 
+                                f'Já existe um treino "{tipo_treino_display}" às {hora_inicio} dia {current_date.strftime("%d/%m/%Y")}.'
+                            )
+                            return redirect('criar_treino')
 
+                        # Criação do treino
                         Treino.objects.create(
                             tipo_treino=tipo_treino,
                             data_inicio=current_date,
-                            data_fim=current_date,  # Mesma data para treino de 1 dia
+                            data_fim=current_date,
                             hora_inicio=hora_inicio,
                             hora_fim=hora_fim,
                             max_participantes=max_participantes,
@@ -635,8 +648,11 @@ def adicionar_utilizador_treino(request, treino_id):
         
         return redirect('reservas_detalhes', treino_id=treino.id)
     
-    usuarios = Utilizadores.objects.all()
-    return render(request, 'adicionar_utilizador_treino.html', {'treino': treino, 'usuarios': usuarios})
+    utilizadores_com_reserva = Reservas.objects.filter(treino=treino).values_list('utilizador_id', flat=True)
+    utilizadores_disponiveis = Utilizadores.objects.exclude(id__in=utilizadores_com_reserva)
+    
+    # usuarios = Utilizadores.objects.all()
+    return render(request, 'adicionar_utilizador_treino.html', {'treino': treino, 'usuarios': utilizadores_disponiveis})
 
 
 
@@ -801,6 +817,7 @@ def apagar_treinos_em_massa(request):
         data_fim = request.POST.get('data_fim')
         tipo_treino = request.POST.get('tipo_treino')
         dia_da_semana = request.POST.get('dia_da_semana')
+        hora_inicio = request.POST.get('hora_inicio')
 
         # Filtro inicial vazio
         filtros = Q()
@@ -814,6 +831,8 @@ def apagar_treinos_em_massa(request):
             filtros &= Q(tipo_treino=tipo_treino)
         if dia_da_semana:
             filtros &= Q(dia_da_semana=dia_da_semana)
+        if hora_inicio:
+            filtros &= Q(hora_inicio=hora_inicio)
 
         # Apaga os treinos filtrados
         treinos_apagados = Treino.objects.filter(filtros).delete()

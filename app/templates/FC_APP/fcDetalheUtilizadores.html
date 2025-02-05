@@ -81,7 +81,7 @@
 
     <div class="button-group">
         {% if request.user.is_staff %}
-            <a href="{% url 'editar_utilizador' perfil.id %}" class="btn-primary">Informações Pessoais</a>
+            <a href="{% url 'editar_utilizador' perfil.id %}" class="btn-primary">Editar Informações</a>
             <a href="{% url 'editardadosbiometricos' perfil.id %}" class="btn-secondary">Dados Biométricos</a>
             <a href="{% url 'ver_recordes_utilizador' perfil.id %}" class="btn-recordes">Recordes</a>
             <a href="{% url 'verassiduidade' perfil.id %}" class="btn-assiduidade">Assiduidade</a>
