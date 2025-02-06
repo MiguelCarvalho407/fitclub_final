@@ -80,7 +80,6 @@ def dologin(request):
             user = authenticate(request, username=email, password=password)
             if user is not None:
                 login(request, user)
-                messages.success(request, f"Olá <b>{user.username}</b>! Acabaste de fazer login")
                 return redirect('fcBase')
             else:
                 form.add_error(None, 'Email ou password incorretos!')
@@ -459,7 +458,6 @@ def editar_utilizador(request, user_id):
         form = EditarInformacoesPessoaisForm(request.POST, instance=utilizador)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Os dados do utilizador foram atualizados com sucesso.')
             return redirect('detalhe_utilizador', user_id=user_id)
     else:
         form = EditarInformacoesPessoaisForm(instance=utilizador)
@@ -620,7 +618,6 @@ def reservas(request, treino_id):
 
 
 
-
 @login_required
 def adicionar_utilizador_treino(request, treino_id):
     if request.user.funcao != 'Ativo':
@@ -630,7 +627,7 @@ def adicionar_utilizador_treino(request, treino_id):
         return render(request, 'ERRORS/403.html')
         
     treino = get_object_or_404(Treino, id=treino_id)
-    
+
     if request.method == 'POST':
         usuario_id = request.POST.get('usuario_id')
         usuario = get_object_or_404(Utilizadores, id=usuario_id)
@@ -643,15 +640,18 @@ def adicionar_utilizador_treino(request, treino_id):
         )
         
         if not created:
+            # Caso já exista a reserva, garantimos que a confirmação seja False
             reserva.confirmado = False
             reserva.save()
         
+        # Redireciona de volta para a página de detalhes do treino
         return redirect('reservas_detalhes', treino_id=treino.id)
     
+    # Recupera os utilizadores que já tem uma reserva e os exclui da lista de utilizadores disponíveis
     utilizadores_com_reserva = Reservas.objects.filter(treino=treino).values_list('utilizador_id', flat=True)
     utilizadores_disponiveis = Utilizadores.objects.exclude(id__in=utilizadores_com_reserva)
     
-    # usuarios = Utilizadores.objects.all()
+    # Renderiza a página com a lista de utilizadores disponíveis
     return render(request, 'adicionar_utilizador_treino.html', {'treino': treino, 'usuarios': utilizadores_disponiveis})
 
 
@@ -857,7 +857,6 @@ def recordes(request):
             recorde.utilizador = request.user
             recorde.save()
 
-            messages.success(request, 'Recorde criado com sucesso!')
             return redirect('recordes')
     else:
         form = CriarRecordesForm(user=request.user)
@@ -1174,4 +1173,65 @@ def export_user_data_to_excel(request, user_id):
     # Salvar o arquivo na resposta HTTP
     wb.save(response)
     return response
+
+
+
+
+
+from django.contrib.auth.tokens import default_token_generator
+
+def password_reset_request(request):
+    if request.method == "POST":
+        form = PasswordResetRequestForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data["email"]
+            user = Utilizadores.objects.get(email=email)
+
+            # Criando o token e a URL de recuperação
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            
+            current_site = request.get_host()
+            reset_url = f"http://{current_site}/reset/{uid}/{token}/"
+
+            # Enviar o e-mail
+            send_mail(
+                "Redefinição de Password",
+                f"Clica no link para redefinir a tua password: {reset_url}",
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+                fail_silently=False,
+            )
+
+            return redirect("login")
+    else:
+        form = PasswordResetRequestForm()
+
+    return render(request, "CONTAS/password_reset_form.html", {"form": form})
+
+
+
+
+
+def password_reset_confirm(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = Utilizadores.objects.get(pk=uid)
+    except (Utilizadores.DoesNotExist, ValueError, TypeError):
+        user = None
+
+    if user and default_token_generator.check_token(user, token):
+        if request.method == "POST":
+            form = SetNewPasswordForm(request.POST)
+            if form.is_valid():
+                user.set_password(form.cleaned_data["new_password1"])
+                user.save()
+                return redirect('login')
+        else:
+            form = SetNewPasswordForm()
+        return render(request, "CONTAS/password_reset_confirm.html", {"form": form})
+    else:
+        return render(request, "CONTAS/password_reset_invalid.html")
+
+
 

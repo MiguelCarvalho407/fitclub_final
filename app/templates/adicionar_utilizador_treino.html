@@ -5,9 +5,9 @@
     <h1>Adicionar Utilizador ao Treino: {{ treino.nome }}</h1>
 
     <!-- Campo de pesquisa -->
-    <input type="text" id="searchInput" class="search-box" placeholder="Pesquisar utilizador..." onkeyup="filtrarUsuarios()">
+    <input type="text" id="searchInput" class="search-box" placeholder="Pesquisar utilizador..." onkeyup="filtrarUtilizadsores()">
 
-    <!-- Lista de usuários (armazenados para paginação dinâmica) -->
+    <!-- Lista de usuários -->
     <ul class="user-list" id="userList">
         {% for usuario in usuarios %}
         <li class="user-item">
@@ -106,6 +106,22 @@
 </style>
 
 <script>
+    // Função para filtrar os utilizadores conforme o texto digitado
+    function filtrarUtilizadsores() {
+        let input = document.getElementById("searchInput").value.toLowerCase(); // Obtém o valor do campo de pesquisa
+        let usuarios = document.querySelectorAll(".user-item"); // Seleciona todos os itens da lista de utilizadores
+
+        usuarios.forEach(usuario => {
+            let nome = usuario.querySelector(".user-name").innerText.toLowerCase(); // Obtém o nome do utilizador
+            if (nome.includes(input)) {
+                usuario.style.display = "flex"; // Exibe o utilizador se o nome incluir o texto da pesquisa
+            } else {
+                usuario.style.display = "none"; // Oculta o utilizador se não corresponder
+            }
+        });
+    }
+
+    // Função para controlar a paginação dos utilizadores
     let utilizadores = Array.from(document.querySelectorAll(".user-item")); // LISTA DOS UTILIZADORES
     let itensPorPagina = 10;  // QUANTIDADE DE UTILIZADORES POR PÁGINA
     let paginaAtual = 1;
@@ -126,19 +142,6 @@
 
     function mudarPagina(direcao) {
         paginaAtual += direcao;
-        mostrarPagina();
-    }
-
-    function filtrarUtilizadsores() {
-        let input = document.getElementById("searchInput").value.toLowerCase();
-        
-        utilizadores.forEach(usuario => {
-            let nome = usuario.querySelector(".user-name").innerText.toLowerCase();
-            usuario.style.display = nome.includes(input) ? "flex" : "none";
-        });
-
-        // Resetar a paginação ao pesquisar
-        paginaAtual = 1;
         mostrarPagina();
     }
 

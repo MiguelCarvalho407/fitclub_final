@@ -402,3 +402,27 @@ class CriarNomeRecordeForm(forms.ModelForm):
         model = RecordesNomes
         fields = ['nome']
 
+
+
+class PasswordResetRequestForm(forms.Form):
+    email = forms.EmailField(label="Email", max_length=254)
+
+    def clean_email(self):
+        email = self.cleaned_data["email"]
+        if not Utilizadores.objects.filter(email=email).exists():
+            raise forms.ValidationError("E-mail não encontrado.")
+        return email
+
+
+class SetNewPasswordForm(forms.Form):
+    new_password1 = forms.CharField(label="Nova password", widget=forms.PasswordInput)
+    new_password2 = forms.CharField(label="Confirmar password", widget=forms.PasswordInput)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password1 = cleaned_data.get("new_password1")
+        password2 = cleaned_data.get("new_password2")
+
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError("Passwords não coincidem.")
+        return cleaned_data

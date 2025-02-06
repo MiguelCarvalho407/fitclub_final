@@ -54,5 +54,10 @@ urlpatterns = [
     path('alterar_senha_concluido/', views.alterar_senha_concluido, name='alterar_senha_concluido'),
 
 
+
+
+    path("password_reset/", views.password_reset_request, name="password_reset"),
+    path("reset/<uidb64>/<token>/", views.password_reset_confirm, name="password_reset_confirm"),
+    
 ]
 
