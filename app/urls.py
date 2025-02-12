@@ -23,6 +23,7 @@ urlpatterns = [
     path('fitclub/dadosbiometricos/', views.dadosbiometricos, name='dadosbiometricos'),
     path('fitclub/utilizador/<int:user_id>/editar/', views.editar_utilizador, name='editar_utilizador'),
     path('fitclub/assiduidade/', views.assiduidade, name='assiduidade'),
+    path('fitclub/cartao/', views.cartao, name='cartao'),
 
     path('fitclub/reservas_detalhes/<int:treino_id>/', views.reservas_detalhes, name='reservas_detalhes'),
     path('reservas/<int:treino_id>/', views.reservas, name='reservas'),

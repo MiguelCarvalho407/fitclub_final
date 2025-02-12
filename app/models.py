@@ -46,6 +46,15 @@ class Utilizadores(AbstractUser):
         ('Nao', 'Não'),
     )
 
+    CONHECIMENTO_FITCLUB = (
+        ('atraves_familiares', 'Através de Familiares'),
+        ('atraves_amigos', 'Através de Amigos'),
+        ('atraves_panfleto', 'Através de Panfleto/Cartaz'),
+        ('atraves_facebook', 'Através de Página Facebook'),
+        ('atraves_instagram', 'Através de Instagram'),
+        ('atraves_whatsapp', 'Através de Grupo WhatsApp'),
+    )
+
 
     id = models.AutoField(primary_key=True)
     username = models.CharField(max_length=100)
@@ -66,6 +75,7 @@ class Utilizadores(AbstractUser):
     fumador = models.CharField(max_length=3, choices=FUMADOR)
     problemas_saude = models.CharField(max_length=3, choices=PROBLEMAS_SAUDE)
     limitacoes_para_pratica_exercicio_fisico = models.CharField(max_length=3, choices=LIMITACOES)
+    como_teve_conhecimento_existencia_fitclub = models.CharField(max_length=100, choices=CONHECIMENTO_FITCLUB, default='Por Definir')
 
 
 

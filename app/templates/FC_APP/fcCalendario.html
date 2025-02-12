@@ -124,42 +124,51 @@
     
     // Função para atualizar o conteúdo do modal
     function updateModal(treino) {
-        const date = new Date(treino.data_inicio);
-    
-        document.querySelector(".modal-title").textContent = 
-            `${treino.tipo_treino} - (${treino.hora_inicio} - ${treino.hora_fim})`;
-        
-        modalDiaSemana.textContent = date.toLocaleDateString("pt-BR", { weekday: "long" });
-        modalData.textContent = date.toLocaleDateString("pt-BR");
-        modalHoraInicio.textContent = treino.hora_inicio;
-        modalHoraFim.textContent = treino.hora_fim;
-        modalTipoTreino.textContent = treino.tipo_treino;
-        modalMaxParticipantes.textContent = treino.max_participantes || "N/A";
-    
-        const isPast = new Date() > new Date(treino.hora_inicio);
-        if (treino.user_reserved) {
-            reservarLink.textContent = "Cancelar Reserva";
-            reservarLink.classList.remove("btn-verde");
-            reservarLink.classList.add("btn-vermelho");
-        } else {
-            reservarLink.textContent = "Reservar";
-            reservarLink.classList.remove("btn-vermelho");
-            reservarLink.classList.add("btn-verde");
-        }
-    
-        if (isPast) {
-            reservarLink.classList.add("btn-disabled");
-            reservarLink.style.pointerEvents = "none";
-        } else {
-            reservarLink.classList.remove("btn-disabled");
-            reservarLink.style.pointerEvents = "auto";
-        }
-    
+    const date = new Date(treino.data_inicio);
+
+    document.querySelector(".modal-title").textContent = 
+        `${treino.tipo_treino} - (${treino.hora_inicio} - ${treino.hora_fim})`;
+
+    modalDiaSemana.textContent = date.toLocaleDateString("pt-BR", { weekday: "long" });
+    modalData.textContent = date.toLocaleDateString("pt-BR");
+    modalHoraInicio.textContent = treino.hora_inicio;
+    modalHoraFim.textContent = treino.hora_fim;
+    modalTipoTreino.textContent = treino.tipo_treino;
+    modalMaxParticipantes.textContent = treino.max_participantes || "N/A";
+
+    const isPast = new Date() > new Date(treino.hora_inicio);
+    if (treino.user_reserved) {
+        reservarLink.textContent = "Cancelar Reserva";
+        reservarLink.classList.remove("btn-verde");
+        reservarLink.classList.add("btn-vermelho");
+    } else {
+        reservarLink.textContent = "Reservar";
+        reservarLink.classList.remove("btn-vermelho");
+        reservarLink.classList.add("btn-verde");
+    }
+
+    if (isPast) {
+        reservarLink.classList.add("btn-disabled");
+        reservarLink.style.pointerEvents = "none";
+    } else {
+        reservarLink.classList.remove("btn-disabled");
+        reservarLink.style.pointerEvents = "auto";
+    }
+
+    // Verifica se os links existem antes de tentar definir o href
+    if (reservarLink) {
         reservarLink.href = treino.reservar_url;
+    }
+    if (detalhesLink) {
         detalhesLink.href = treino.detalhes_url;
+    }
+    if (editarLink) {
         editarLink.href = `/fitclub/editar_treino/${treino.id}/`;
+    }
+    if (apagarLink) {
         apagarLink.href = `/fitclub/apagartreino/${treino.id}/`;
     }
+}
     
     // Função para navegar para o treino anterior
     function showPrevTreino() {

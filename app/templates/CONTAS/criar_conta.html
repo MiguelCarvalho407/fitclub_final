@@ -129,6 +129,14 @@
                         <span class="text-danger" style="color: red;">{{ error }}</span>
                     {% endfor %}
                 </div>
+                
+                <div class="inputBox">
+                    <label for="genero">Como tiveste conhecimento da existência do FITCLUB:</label>
+                    {{ form.como_teve_conhecimento_existencia_fitclub }}
+                    {% for error in form.como_teve_conhecimento_existencia_fitclub.errors %}
+                        <span class="text-danger" style="color: red;">{{ error }}</span>
+                    {% endfor %}
+                </div>
 
                 <div class="inputBox">
                     <label for="genero">Chave:</label>
@@ -137,6 +145,7 @@
                         <span class="text-danger" style="color: red;">{{ error }}</span>
                     {% endfor %}
                 </div>
+
 
                 <input type="submit" class="button" value="Criar Conta">
             </form>

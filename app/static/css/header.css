@@ -123,7 +123,8 @@ header{
     }
 
     .nav-bar.active{
-        height: 450px;
+        /* height: 450px; */
+        height: 60%;
     }
 
     .nav-bar{

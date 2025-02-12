@@ -65,6 +65,9 @@ class CriarContaForm(forms.Form):
     limitacoes_para_pratica_exercicio_fisico = forms.ChoiceField(choices=Utilizadores.LIMITACOES, widget=forms.Select(attrs={
         'class': 'form-control'
     }))
+    como_teve_conhecimento_existencia_fitclub = forms.ChoiceField(choices=Utilizadores.CONHECIMENTO_FITCLUB, widget=forms.Select(attrs={
+        'class':'form-control'
+    }))
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
@@ -143,7 +146,7 @@ class InformacoesPessoaisForm(forms.ModelForm):
     class Meta:
         model = Utilizadores
         fields = ['email', 'username', 'data_nascimento', 'genero', 'morada', 'codigo_postal', 'localidade', 'contacto',
-                  'nif', 'pretende_recibo', 'profissao', 'classificacao_esforco_na_profissao', 'fumador', 'problemas_saude', 'limitacoes_para_pratica_exercicio_fisico']
+                  'nif', 'pretende_recibo', 'profissao', 'classificacao_esforco_na_profissao', 'fumador', 'problemas_saude', 'limitacoes_para_pratica_exercicio_fisico', 'como_teve_conhecimento_existencia_fitclub']
         widgets = {
             'email':forms.EmailInput(attrs={
                 'readonly': 'readonly'
@@ -189,7 +192,7 @@ class EditarInformacoesPessoaisForm(forms.ModelForm):
     class Meta:
         model = Utilizadores
         fields = ['username', 'email', 'contacto', 'data_nascimento', 'genero', 'morada', 'codigo_postal', 'localidade', 'funcao',
-                  'nif', 'pretende_recibo', 'profissao', 'classificacao_esforco_na_profissao', 'fumador', 'problemas_saude', 'limitacoes_para_pratica_exercicio_fisico', 'is_staff']
+                  'nif', 'pretende_recibo', 'profissao', 'classificacao_esforco_na_profissao', 'fumador', 'problemas_saude', 'limitacoes_para_pratica_exercicio_fisico', 'is_staff', 'como_teve_conhecimento_existencia_fitclub']
         widgets = {
             'email':forms.EmailInput(attrs={
                 'readonly': 'readonly'

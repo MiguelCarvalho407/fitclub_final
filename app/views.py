@@ -1234,4 +1234,9 @@ def password_reset_confirm(request, uidb64, token):
         return render(request, "CONTAS/password_reset_invalid.html")
 
 
+@login_required
+def cartao(request):
+    return render(request, 'FC_APP/fcCartao.html')
+
+
 
