@@ -156,20 +156,5 @@
         </div>
     </div>
 
-    <script>
-        document.getElementById('signup-form').addEventListener('submit', function(event) {
-            var email = document.getElementById('email').value;
-            if (!email.includes('@')) {
-                alert("O e-mail deve conter um '@'.");
-                event.preventDefault();
-            } else {
-                var domain = email.split('@')[1];
-                if (!domain.includes('.')) {
-                    alert("O domínio do e-mail parece inválido.");
-                    event.preventDefault();
-                }
-            }
-        });
-    </script>
 </body>
 </html>

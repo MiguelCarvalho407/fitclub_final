@@ -44,7 +44,6 @@ def signup(request):
             if Utilizadores.objects.filter(email=email).exists():
                 form.add_error('email', 'Este email já está em uso.')
             else:
-
                 utilizador = Utilizadores.objects.create_user(
                     username=form.cleaned_data['nome'],
                     email=form.cleaned_data['email'],
@@ -59,11 +58,10 @@ def signup(request):
                     fumador=form.cleaned_data['fumador'],
                     problemas_saude=form.cleaned_data['problemas_saude'],
                     limitacoes_para_pratica_exercicio_fisico=form.cleaned_data['limitacoes_para_pratica_exercicio_fisico'],
-                    
+                    como_teve_conhecimento_existencia_fitclub=form.cleaned_data['como_teve_conhecimento_existencia_fitclub'],
                 )
                 utilizador.save()
 
-                # activateEmail(request, user, form.cleaned_data.get('email'))
                 return redirect('login')
     else:
         form = CriarContaForm()
@@ -289,6 +287,7 @@ def calendario(request):
             'hora_inicio': treino.hora_inicio.strftime('%H:%M'),
             'hora_fim': treino.hora_fim.strftime('%H:%M'),
             'max_participantes': treino.max_participantes,
+            'reservados': treino.total_reservas(),
             'reservar_url': reverse('reservas', args=[treino.id]),
             'detalhes_url': reverse('reservas_detalhes', args=[treino.id]),
             'user_reserved': treino.user_reserved,
@@ -535,7 +534,6 @@ def detalhe_utilizador(request, user_id):
 
 
 
-
 @login_required
 def reservas(request, treino_id):
     if request.user.funcao != 'Ativo':
@@ -590,7 +588,6 @@ def reservas(request, treino_id):
         if ListaEspera.objects.filter(treino=treino).count() >= treino.max_lista_espera:
             return render(request, 'lista_espera_full.html', {'treino': treino})
     
-
         # ADICIONAR O UTILIZADOR À LISTA DE ESPERA, CASO ELE AINDA NÃO ESTEJA NELA
         ListaEspera.objects.get_or_create(utilizador=request.user, treino=treino)
 
@@ -600,17 +597,8 @@ def reservas(request, treino_id):
         # CASO O TREINO NÃO ESTEJA CHEIO, CRIAR UMA NOVA RESERVA
         Reservas.objects.create(utilizador=request.user, treino=treino)
 
-    # OBTER DETALHES DAS RESERVAS E LISTA DE ESPERA
-    reservas_confirmadas = Reservas.objects.filter(treino=treino)
-    lista_espera = ListaEspera.objects.filter(treino=treino).order_by('data_entrada')
-    print(lista_espera)
-
-    # RENDERIZAR OS DETALHES DO TREINO
-    return render(request, 'FC_RESERVAS/fcReservas_detalhes.html', {
-        'treino': treino,
-        'reservas': reservas_confirmadas,
-        'lista_espera': lista_espera,
-    })
+    # REDIRECIONAR PARA O CALENDÁRIO APÓS A RESERVA
+    return redirect('calendario')
 
 
 
@@ -636,7 +624,7 @@ def adicionar_utilizador_treino(request, treino_id):
         reserva, created = Reservas.objects.get_or_create(
             utilizador=usuario,
             treino=treino,
-            defaults={'confirmado': False}  # Define a reserva como confirmada
+            defaults={'confirmado': None}  # Define a reserva como confirmada
         )
         
         if not created:
@@ -691,29 +679,54 @@ def lista_espera_view(request, treino_id):
 def reservas_detalhes(request, treino_id):
     if request.user.funcao != 'Ativo':
         return redirect('acesso_negado')
-    
+
     treino = get_object_or_404(Treino, id=treino_id)
     reservas = Reservas.objects.filter(treino=treino)
+    lista_espera = ListaEspera.objects.filter(treino=treino).order_by('data_entrada')
 
     if request.method == 'POST':
         reservas_id = request.POST.get('reservas_id')
         reserva = get_object_or_404(Reservas, id=reservas_id)
-
         action = request.POST.get('action')
 
-        # Se o botão de confirmação foi pressionado
-        if action == 'confirm':
-            reserva.confirmado = True
+        if action == 'presente':
+            reserva.confirmado = True  # Usuário está presente
+            reserva.save()
+        elif action == 'ausente':
+            reserva.confirmado = False  # Usuário está ausente
             reserva.save()
 
-        # Se o botão de cancelamento foi pressionado
-        elif action == 'cancel':
-            reserva.confirmado = False
+            # Enviar e-mail ao usuário informando a ausência
+            assunto = "FitClub - Ausência no Treino"
+            mensagem = f"""
+            Olá {reserva.utilizador.username},
+
+            Marcaste reserva para o treino do dia {reserva.treino.data_inicio} às {reserva.treino.hora_inicio} mas não compareceste no mesmo.
+
+            Não te esqueças de pagar a taxa de ausência até ao próximo treino!
+
+            Com os melhores cumprimentos,  
+            Equipa FitClub
+            """
+            
+            remetente = "miguelcarvalho407@gmail.com"  # Altere para o seu e-mail configurado no Django
+            destinatario = [reserva.utilizador.email]
+
+            send_mail(assunto, mensagem, remetente, destinatario, fail_silently=False)
+
+            messages.success(request, f"E-mail enviado para {reserva.utilizador.email} notificando ausência.")
+
+        else:
+            reserva.confirmado = None
             reserva.save()
 
         return redirect('reservas_detalhes', treino_id=treino.id)
-    
-    return render(request, 'FC_RESERVAS/fcReservas_detalhes.html', {'treino': treino, 'reservas': reservas})
+
+    return render(
+        request, 
+        'FC_RESERVAS/fcReservas_detalhes.html', 
+        {'treino': treino, 'reservas': reservas, 'lista_espera': lista_espera}
+    )
 
 
 

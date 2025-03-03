@@ -114,6 +114,31 @@ body {
     animation: slideIn 0.3s ease-out;
 }
 
+.modal-close{
+    top: 15px;
+    right: 20px;
+    font-size: 22px;
+    font-weight: bold;
+    color: #fff;
+    cursor: pointer;
+    transition: color 0.3s, transform 0.2s;
+    background-color: transparent;
+    border: none;
+    margin-left: 97%;
+}
+
+.btn-ver-mais {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+}
+
 .modal-title {
     font-size: 1.5rem;
     margin-bottom: 15px;
@@ -267,6 +292,44 @@ body {
     display: block;
     margin: 5px auto;
 }
+
+
+.detalhes-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.detalhe-item {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #444;
+    padding: 5px 0;
+}
+
+.detalhe-label {
+    font-weight: bold;
+    color: #c0c0c0;
+    text-align: left;
+    flex: 1;
+}
+
+.detalhe-valor {
+    text-align: right;
+    flex: 1;
+    color: #eee;
+}
+
+
+.btn-ver-mais.reservado {
+    background-color: green;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
 
 
 @media (max-width: 768px) {

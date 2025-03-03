@@ -8,7 +8,7 @@
 <div class="training-container-alt">
     <h1 class="titulo-alt">Criar Aula</h1>
     
-    {% if messages %}
+    <!-- {% if messages %}
         <div class="messages-container">
             {% for message in messages %}
                 <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
@@ -16,7 +16,7 @@
                 </div>
             {% endfor %}
         </div>
-    {% endif %}
+    {% endif %} -->
 
     <form method="post" class="form-horizontal">
         {% csrf_token %}

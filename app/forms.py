@@ -4,7 +4,7 @@ from .models import *
 import re
 from django.contrib.auth.forms import PasswordChangeForm
 import dns.resolver
-
+from django.core.exceptions import ValidationError
 
 
 class CriarContaForm(forms.Form):

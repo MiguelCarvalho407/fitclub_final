@@ -4,50 +4,63 @@
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/fcReservas_detalhes.css' %}">
 
+
+
 <div class="container reservas-container">
     <h3>Reservas:</h3>
-    
     <ul class="reservas-lista">
         {% for reserva in reservas %}
             <li class="reserva-item">
                 <div class="utilizador-info">
-                    <strong>{{ reserva.utilizador.username }}</strong>
-                </div>
-
-                <div class="status">
-                    {% if reserva.confirmado %}
-                        <!-- <span class="confirmado">Confirmado</span> -->
-                        <form method="post" class="confirmar-form">
-                            {% csrf_token %}
-                            <input type="hidden" name="reservas_id" value="{{ reserva.id }}">
-                            {% if request.user.is_staff %}
-                                <button type="submit" name="action" value="cancel" class="cancelar-btn">Cancelar Confirmação</button>
-                            {% endif %}
-                        </form>
+                    <strong>{{ reserva.utilizador.username }}</strong> 
+                    {% if reserva.confirmado == True %}
+                        <span class="status-text presente-text">- Presente</span>
+                    {% elif reserva.confirmado == False %}
+                        <span class="status-text ausente-text">- Ausente</span>
                     {% else %}
-                        <!-- <span class="nao-confirmado">Não Confirmado</span> -->
-                        <form method="post" class="confirmar-form">
-                            {% csrf_token %}
-                            <input type="hidden" name="reservas_id" value="{{ reserva.id }}">
-                            {% if request.user.is_staff %}
-                                <button type="submit" name="action" value="confirm" class="confirmar-btn">Confirmar Presença</button>
-                            {% endif %}
-                        </form>
+                        <span class="status-text pendente-text">- Pendente</span>
                     {% endif %}
                 </div>
+
+                <form method="post" class="confirmar-form" id="form-{{ reserva.id }}">
+                    {% csrf_token %}
+                    <input type="hidden" name="reservas_id" value="{{ reserva.id }}">
+                    {% if request.user.is_staff %}
+                        <button type="submit" name="action" value="presente" class="presente-btn">Presente</button>
+                        <button type="submit" name="action" value="ausente" class="ausente-btn">Ausente</button>
+                    {% endif %}
+                </form>
+
+
+
             </li>
         {% empty %}
             <li>Não há reservas para este treino.</li>
         {% endfor %}
     </ul>
 
-    
+    <h3>Lista de Espera:</h3>
+    <ul class="lista-espera">
+        {% for espera in lista_espera %}
+            <li class="espera-item">
+                <div class="utilizador-info">
+                    <strong>{{ espera.utilizador.username }}:</strong> A aguardar!
+                </div>
+            </li>
+        {% empty %}
+            <li>Não há utilizadores na lista de espera.</li>
+        {% endfor %}
+    </ul>
+
     <div class="voltar">
-        <a href="{% url 'listaespera' treino.id %}" class="lista-espera-btn">Lista de Espera</a>
         {% if request.user.is_staff %}
             <a href="{% url 'adicionar_utilizador_treino' treino.id %}" class="adicionar-utilizador-btn">Adicionar Utilizador</a>
         {% endif %}
         <a href="{% url 'calendario' %}" class="voltar-btn">Voltar</a>
     </div>
 </div>
+
+
+
+
 {% endblock %}

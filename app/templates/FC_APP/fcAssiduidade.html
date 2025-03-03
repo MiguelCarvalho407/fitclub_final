@@ -25,9 +25,9 @@
 
     <h2>Estatísticas</h2>
     <p>Total de Treinos: <span>{{ total_reservas }}</span></p>
-    <p>Total de Treinos Confirmados: <span>{{ total_reservas_confirmadas }}</span></p>
-    <p>Total de Treinos Não Confirmados: <span>{{ total_reservas_nao_confirmadas }}</span></p>
-    <p>Média Semanal de Frequência: <span>{{ media_semanal|floatformat:2 }}%</span></p>
+    <p>Total de Treinos Presente: <span>{{ total_reservas_confirmadas }}</span></p>
+    <p>Total de Treinos Ausente: <span>{{ total_reservas_nao_confirmadas }}</span></p>
+    <p>Média Semanal: <span>{{ media_semanal|floatformat:2 }}%</span></p>
 
     <h2>Reservas</h2>
     <table>

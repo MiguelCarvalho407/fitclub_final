@@ -199,6 +199,12 @@ class Treino(models.Model):
         
         # Retorna True se o horário atual estiver no intervalo de abertura e fechamento
         return abertura_reservas <= now <= fechamento_reservas
+    
+    def total_reservas(self):
+        return Reservas.objects.filter(treino=self).count()
+    
+    def reservado_por_usuario(self, usuario):
+        return self.participantes.filter(id=usuario.id).exists()
 
     def __str__(self):
         return f"{self.get_tipo_treino_display()} - {self.dia_da_semana}"
@@ -216,7 +222,7 @@ class Treino(models.Model):
 class Reservas(models.Model):
     utilizador = models.ForeignKey(Utilizadores, on_delete=models.CASCADE)
     treino = models.ForeignKey(Treino, on_delete=models.CASCADE)
-    confirmado = models.BooleanField(default=False)
+    confirmado = models.BooleanField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.utilizador.username} - {self.treino.hora_inicio} - {self.treino.hora_fim} - {self.treino.tipo}"
