@@ -34,6 +34,8 @@ urlpatterns = [
     #CRUD
     path('fitclub/editar_treino/<int:treino_id>/', views.editar_treino, name='editar_treino'),
     path('fitclub/apagartreino/<int:pk>/', views.apagartreino, name='apagartarefa'),
+    
+    path('fitclub/criartipotreino/', views.criar_tipo_treino, name='criar_tipo_treino'),
 
     path('sairlistaespera/<int:treino_id>/', views.cancelar_lista_espera, name='cancelar_lista_espera'),
 

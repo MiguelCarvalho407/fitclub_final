@@ -111,7 +111,9 @@ body {
     padding: 20px;
     width: 80%;
     max-width: 500px;
-    animation: slideIn 0.3s ease-out;
+
+    max-height: 80vh;
+    overflow-y: auto;
 }
 
 .modal-close{
@@ -149,6 +151,9 @@ body {
 
 .modal-body {
     margin-bottom: 20px;
+
+    /* max-height: 60vh;
+    overflow-y: auto; */
 }
 
 .modal-info {

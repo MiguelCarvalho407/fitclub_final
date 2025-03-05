@@ -48,14 +48,15 @@
 
         <div class="form-row">
             <div class="form-column">
-                <label for="tipo_treino">{{ form.tipo_treino.label }}</label>
+                <label for="tipo_treino">{{ form.tipo_treino.label }} <a href="{% url 'criar_tipo_treino' %}">(Criar Novo)</a></label>
                 {{ form.tipo_treino }}
             </div>
-            
+
             <div class="form-column">
-                <label for="max_participantes">{{ form.max_participantes.label }}</label>
-                {{ form.max_participantes }}
+                <label for="tipo_treino">{{ form.tipo_treino_nome.label }}</label>
+                {{ form.tipo_treino_nome }}
             </div>
+            
         </div>
 
         <div class="form-row">
@@ -65,17 +66,24 @@
             </div>
 
             <div class="form-column">
+                <label for="max_participantes">{{ form.max_participantes.label }}</label>
+                {{ form.max_participantes }}
+            </div>
+        </div>
+        <div class="form-row">
+            
+            <div class="form-column">
                 <label for="max_lista_espera">{{ form.max_lista_espera.label }}</label>
                 {{ form.max_lista_espera }}
             </div>
-        </div>
 
-        <div class="form-row">
             <div class="form-column">
                 <label for="hora_abertura_reservas">{{ form.reservas_horas_antes.label }}</label>
                 {{ form.reservas_horas_antes }}
             </div>
+        </div>
 
+        <div class="form-row">
             <div class="form-column">
                 <label for="reservas_horas_fecho">{{ form.reservas_horas_fecho.label }}</label>
                 {{ form.reservas_horas_fecho }}

@@ -311,17 +311,25 @@ class EditarDadosBiometricos(forms.ModelForm):
 
 
 
+class CriarTipoTreinoForm(forms.ModelForm):
+    class Meta:
+        model = NomeTipoTreino
+        fields = ['nome']
+
 
 class CriarTreinoForm(forms.Form):
     tipo_treino = forms.ChoiceField(
-        choices=[
-            ('treino_funcional', 'Treino Funcional'),
-            ('mobilidade', 'Mobilidade'),
-            ('força', 'Força'),
-            ('total_fit', 'Total FIT'),
-        ],
-        label="Tipo de Treino"
+        choices=[('', '----------')] + list(Treino.TIPO_TREINO_CHOICES),
+        label="Tipo de Treino",
+        required=False,
     )
+    tipo_treino_nome = forms.ModelChoiceField(
+        queryset=NomeTipoTreino.objects.all(),
+        label="Tipo de Treino Personalizado",
+        required=False,
+        empty_label="----------"
+    )
+
     data_inicio = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date'}),
         input_formats=['%Y-%m-%d'],

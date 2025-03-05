@@ -82,7 +82,10 @@
         treinoDiv.classList.add("treino-item");
         treinoDiv.innerHTML = `
             <div>
-                <strong>${treino.tipo_treino} (${treino.hora_inicio} - ${treino.hora_fim})</strong>
+                <strong>
+                    ${treino.tipo_treino_nome ? treino.tipo_treino_nome : treino.tipo_treino} 
+                    (${treino.hora_inicio} - ${treino.hora_fim})
+                </strong>
                 <button class="btn-ver-mais ${treino.user_reserved ? 'reservado' : ''}">Ver mais</button>
                 ${treino.user_reserved 
                     ? `<a href="${treino.reservar_url}" class="cancelar-reserva">Cancelar Reserva</a>` 
@@ -110,7 +113,7 @@
                     </div>
                     <div class="detalhe-item">
                         <span class="detalhe-label">Tipo de Treino:</span>
-                        <span class="detalhe-valor">${treino.tipo_treino}</span>
+                        <span class="detalhe-valor">${treino.tipo_treino_nome ? treino.tipo_treino_nome : treino.tipo_treino}</span>
                     </div>
                     <div class="detalhe-item">
                         <span class="detalhe-label">Participantes:</span>

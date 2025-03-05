@@ -22,6 +22,15 @@
                         <span class="status-text pendente-text">- Pendente</span>
                     {% endif %}
                 </div>
+                
+                {% if request.user.is_staff %}
+                    <form method="POST" action="{% url 'reservas_detalhes' treino_id=treino.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="reservas_id" value="{{ reserva.id }}">
+                        <button type="submit" name="action" value="presente" class="presente-btn">Presente</button>
+                        <button type="submit" name="action" value="ausente" class="ausente-btn">Ausente</button>
+                    </form>
+                {% endif %}
             </li>
         {% empty %}
             <li>Não há reservas para este treino.</li>

@@ -156,6 +156,13 @@ class Dados_biometricos(models.Model):
         super().save(*args, **kwargs)
 
 
+class NomeTipoTreino(models.Model):
+    nome = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.nome
+
+
 
 class Treino(models.Model):
     DIAS_DA_SEMANA_CHOICES = [
@@ -191,7 +198,8 @@ class Treino(models.Model):
         (12, '12 horas antes'),
     ]
 
-    tipo_treino = models.CharField(max_length=50, choices=TIPO_TREINO_CHOICES)
+    tipo_treino = models.CharField(max_length=50, choices=TIPO_TREINO_CHOICES, null=True, blank=True)
+    tipo_treino_nome = models.ForeignKey(NomeTipoTreino, on_delete=models.CASCADE, null=True, blank=True)
     data_inicio = models.DateField()
     data_fim = models.DateField()
     hora_inicio = models.TimeField()

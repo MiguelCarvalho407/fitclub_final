@@ -166,6 +166,26 @@ def fcBase(request):
 
 
 
+@login_required
+def criar_tipo_treino(request):
+    if not request.user.is_staff:
+        return render(request, 'ERRORS/403.html')
+    
+    if request.user.funcao != 'Ativo':
+        return redirect('acesso_negado')
+    
+    if request.method == 'POST':
+        form = CriarTipoTreinoForm(request.POST or None)
+        if form.is_valid():
+            form.save()
+
+            return redirect('criar_treino')
+        
+    else:
+        form = CriarTipoTreinoForm()
+
+
+    return render(request, 'FC_APP/fcCriar_tipo_treino.html', {'form': form})
 
 
 @login_required
@@ -177,6 +197,7 @@ def criar_treinos(request):
         form = CriarTreinoForm(request.POST)
         if form.is_valid():
             tipo_treino = form.cleaned_data['tipo_treino']
+            tipo_treino_nome = form.cleaned_data['tipo_treino_nome']
             data_inicio = form.cleaned_data['data_inicio']
             data_fim = form.cleaned_data['data_fim']
             hora_inicio = form.cleaned_data['hora_inicio']
@@ -220,6 +241,7 @@ def criar_treinos(request):
                         # Criação do treino
                         Treino.objects.create(
                             tipo_treino=tipo_treino,
+                            tipo_treino_nome=tipo_treino_nome,
                             data_inicio=current_date,
                             data_fim=current_date,
                             hora_inicio=hora_inicio,
@@ -283,6 +305,7 @@ def calendario(request):
         treinos_data.append({
             'id': treino.id,
             'tipo_treino': treino.get_tipo_treino_display(),
+            'tipo_treino_nome': treino.tipo_treino_nome.nome if treino.tipo_treino_nome else None,
             'data_inicio': treino.data_inicio.strftime('%Y-%m-%d'),
             'hora_inicio': treino.hora_inicio.strftime('%H:%M'),
             'hora_fim': treino.hora_fim.strftime('%H:%M'),
