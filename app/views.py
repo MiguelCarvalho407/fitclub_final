@@ -377,10 +377,10 @@ def editardadosbiometricos(request, user_id):
     ).first()
 
     # Calcular idade do utilizador
-    if request.user.data_nascimento:
+    if utilizador.data_nascimento:
         hoje = date.today()
-        idade = hoje.year - request.user.data_nascimento.year - (
-            (hoje.month, hoje.day) < (request.user.data_nascimento.month, request.user.data_nascimento.day)
+        idade = hoje.year - utilizador.data_nascimento.year - (
+            (hoje.month, hoje.day) < (utilizador.data_nascimento.month, utilizador.data_nascimento.day)
         )
     else:
         idade = "Não informado"
@@ -462,14 +462,19 @@ def detalhe_dadosbiometricos(request, user_id):
 def membros(request):
     if request.user.funcao != 'Ativo':
         return redirect('acesso_negado')
-    
+
+    query = request.GET.get('q', '')  # Obtém o termo de pesquisa da URL
     utilizadores = Utilizadores.objects.all()
 
-    paginator = Paginator(utilizadores, 10)
+    if query:
+        utilizadores = utilizadores.filter(username__icontains=query)  # Filtra pelo nome de usuário
+
+    # Paginação
+    paginator = Paginator(utilizadores, 10)  # 10 utilizadores por página
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'FC_APP/fcMembros.html', {'page_obj': page_obj})
+    return render(request, 'FC_APP/fcMembros.html', {'page_obj': page_obj, 'query': query})
 
 
 @login_required

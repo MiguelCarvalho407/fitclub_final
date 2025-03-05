@@ -8,8 +8,9 @@
 <h1>Membros</h1>
 
 <div class="barra">
-    <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Procurar membro..." class="search-box">
+    <input type="text" id="searchInput" name="q" value="{{ query }}" placeholder="Procurar membro..." class="search-box">
 </div>
+
 
 
 <table class="table">
@@ -39,16 +40,15 @@
 
 <div class="pagination">
     {% if page_obj.has_previous %}
-        <a href="?page=1">« Primeira</a>
-        <a href="?page={{ page_obj.previous_page_number }}">‹ Anterior</a>
-        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        <a href="?q={{ query }}&page=1">« Primeira</a>
+        <a href="?q={{ query }}&page={{ page_obj.previous_page_number }}">‹ Anterior</a>
     {% endif %}
 
-    
+    <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
 
     {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}">Próxima ›</a>
-        <a href="?page={{ page_obj.paginator.num_pages }}">Última »</a>
+        <a href="?q={{ query }}&page={{ page_obj.next_page_number }}">Próxima ›</a>
+        <a href="?q={{ query }}&page={{ page_obj.paginator.num_pages }}">Última »</a>
     {% endif %}
 </div>
 
@@ -59,25 +59,24 @@
 {% endif %}
 
 <script>
-    function searchTable() {
-        var input, filter, table, tr, td, i, txtValue;
-        input = document.getElementById("searchInput");
-        filter = input.value.toUpperCase();
-        table = document.querySelector(".table");
-        tr = table.getElementsByTagName("tr");
-    
-        for (i = 1; i < tr.length; i++) { // Começa em 1 para ignorar o cabeçalho
-            td = tr[i].getElementsByTagName("td")[0]; // Coluna do nome
-            if (td) {
-                txtValue = td.textContent || td.innerText;
-                if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                    tr[i].style.display = "";
-                } else {
-                    tr[i].style.display = "none";
-                }
-            }
-        }
-    }
-    </script>
+    document.getElementById("searchInput").addEventListener("keyup", function() {
+        let query = this.value;
+        let url = new URL(window.location.href);
+        url.searchParams.set("q", query);  // Atualiza a URL com a query
+        url.searchParams.set("page", 1);  // Sempre volta para a página 1 ao pesquisar
+        
+        fetch(url)  // Faz a requisição para o servidor
+            .then(response => response.text())
+            .then(data => {
+                let parser = new DOMParser();
+                let newDocument = parser.parseFromString(data, "text/html");
+                let newTable = newDocument.querySelector("table");
+                let newPagination = newDocument.querySelector(".pagination");
+
+                document.querySelector("table").innerHTML = newTable.innerHTML;  // Atualiza a tabela
+                document.querySelector(".pagination").innerHTML = newPagination.innerHTML;  // Atualiza a paginação
+            });
+    });
+</script>
 
 {% endblock %}
