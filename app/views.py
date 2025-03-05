@@ -699,9 +699,6 @@ def cancelar_lista_espera(request, treino_id):
 
     if lista_espera.exists():
         lista_espera.delete()
-        messages.success(request, "Você saiu da lista de espera com sucesso.")
-    else:
-        messages.error(request, "Você não está na lista de espera para este treino.")
 
     return redirect('reservas_detalhes', treino_id=treino.id)
 

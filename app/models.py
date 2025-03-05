@@ -130,14 +130,14 @@ class Utilizadores(AbstractUser):
 class Dados_biometricos(models.Model):
     idade = models.IntegerField(null=True, blank=True)  # Inteiro para idade
     altura = models.IntegerField(null=True, blank=True)  # Decimal para manter precisão
-    peso = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, default=None)
-    imc = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, editable=False, default=None)
-    massa_gorda = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, default=None)
-    massa_muscular = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, default=None)
-    agua = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, default=None)
-    gordura_visceral = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, default=None)
-    idade_biologica = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, default=None)
-    nivel_fisico = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, default=None)
+    peso = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    imc = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, editable=False)
+    massa_gorda = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    massa_muscular = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    agua = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    gordura_visceral = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    idade_biologica = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    nivel_fisico = models.CharField(max_length=50, null=True, blank=True)
 
     data_registo = models.DateField(auto_now_add=True)
     utilizador = models.ForeignKey(Utilizadores, on_delete=models.CASCADE)
