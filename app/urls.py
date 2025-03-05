@@ -35,6 +35,8 @@ urlpatterns = [
     path('fitclub/editar_treino/<int:treino_id>/', views.editar_treino, name='editar_treino'),
     path('fitclub/apagartreino/<int:pk>/', views.apagartreino, name='apagartarefa'),
 
+    path('sairlistaespera/<int:treino_id>/', views.cancelar_lista_espera, name='cancelar_lista_espera'),
+
     path('fitclub/utilizador/<int:user_id>/dadosbiometricos', views.editardadosbiometricos, name='editardadosbiometricos'),
     path('fitclub/utilizador/<int:user_id>/assiduidade/', views.ver_assiduidade, name='verassiduidade'),
 

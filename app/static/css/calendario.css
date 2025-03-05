@@ -128,7 +128,7 @@ body {
 }
 
 .btn-ver-mais {
-    background-color: #007bff;
+    background-color: #5a6268;
     color: white;
     border: none;
     padding: 6px 12px;
@@ -329,6 +329,73 @@ body {
     border-radius: 5px;
     cursor: pointer;
 }
+
+
+
+.treino-buttons {
+    display: flex;
+    flex-direction: column; /* Organiza os botões em coluna */
+    gap: 5px; /* Espaço entre os botões */
+    margin-top: 10px; /* Espaço superior para separar da linha */
+    padding-top: 10px; /* Espaço extra acima */
+    border-top: 1px solid #444; /* Linha separadora */
+}
+
+.btn-ver-mais{
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: 100%; /* Faz os botões ocuparem a largura toda */
+    text-align: center; /* Centraliza o texto */
+    padding: 8px;
+    border-radius: 5px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.cancelar-reserva {
+    display: block; /* Faz o <a> se comportar como um bloco */
+    width: 100%; /* Garante que ele ocupe toda a largura */
+    text-align: center; /* Centraliza o texto */
+    background-color: #dc3545;
+    color: white;
+    padding: 4px;
+    border-radius: 5px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.cancelar-reserva {
+    background-color: #dc3545;
+    color: white;
+}
+
+
+
+.message-container {
+    display: flex;
+    justify-content: center; /* Centraliza horizontalmente */
+    align-items: center; /* Ajusta o alinhamento vertical */
+    width: 100%;
+    margin-top: 20px; /* Espaço superior para não ficar colado ao topo */
+}
+
+.alert {
+    padding: 15px;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 80%;
+    max-width: 400px;
+}
+
+.alert-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
 
 
 

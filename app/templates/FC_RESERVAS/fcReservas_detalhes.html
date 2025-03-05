@@ -4,7 +4,8 @@
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/fcReservas_detalhes.css' %}">
 
-
+<!-- Biblioteca SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <div class="container reservas-container">
     <h3>Reservas:</h3>
@@ -21,18 +22,6 @@
                         <span class="status-text pendente-text">- Pendente</span>
                     {% endif %}
                 </div>
-
-                <form method="post" class="confirmar-form" id="form-{{ reserva.id }}">
-                    {% csrf_token %}
-                    <input type="hidden" name="reservas_id" value="{{ reserva.id }}">
-                    {% if request.user.is_staff %}
-                        <button type="submit" name="action" value="presente" class="presente-btn">Presente</button>
-                        <button type="submit" name="action" value="ausente" class="ausente-btn">Ausente</button>
-                    {% endif %}
-                </form>
-
-
-
             </li>
         {% empty %}
             <li>Não há reservas para este treino.</li>
@@ -46,6 +35,12 @@
                 <div class="utilizador-info">
                     <strong>{{ espera.utilizador.username }}:</strong> A aguardar!
                 </div>
+
+                {% if espera.utilizador == request.user %}
+                    <button class="btn-sair-lista-espera" onclick="confirmarCancelamento('{{ treino.id }}')">
+                        Sair da Lista de Espera
+                    </button>
+                {% endif %}
             </li>
         {% empty %}
             <li>Não há utilizadores na lista de espera.</li>
@@ -60,7 +55,24 @@
     </div>
 </div>
 
-
-
+<!-- Script para o popup -->
+<script>
+function confirmarCancelamento(treinoId) {
+    Swal.fire({
+        title: "Tem certeza?",
+        text: "Deseja sair da lista de espera?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Sim, sair!",
+        cancelButtonText: "Cancelar"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = `/sairlistaespera/${treinoId}/`;
+        }
+    });
+}
+</script>
 
 {% endblock %}

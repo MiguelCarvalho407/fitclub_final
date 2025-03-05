@@ -222,7 +222,17 @@ h3 {
 
 
 
-
+.btn-sair-lista-espera{
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 5px;
+}
 
 
 

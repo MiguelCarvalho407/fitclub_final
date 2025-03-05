@@ -304,7 +304,7 @@ def calendario(request):
 def dadosbiometricos(request):
     if request.user.funcao != 'Ativo':
         return redirect('acesso_negado')
-    
+
     ano = int(request.GET.get('ano', datetime.now().year))
     mes = int(request.GET.get('mes', datetime.now().month))
 
@@ -314,6 +314,18 @@ def dadosbiometricos(request):
         data_registo__month=mes,
     ).first()
 
+    # Calcular idade do utilizador
+    if request.user.data_nascimento:
+        hoje = date.today()
+        idade = hoje.year - request.user.data_nascimento.year - (
+            (hoje.month, hoje.day) < (request.user.data_nascimento.month, request.user.data_nascimento.day)
+        )
+    else:
+        idade = "Não informado"
+
+    if not dados_biometricos:
+        dados_biometricos = Dados_biometricos(utilizador=request.user, data_registo=datetime(ano, mes, 1))
+
     if request.method == 'POST':
         form = DadosBiometricosForm(request.POST, instance=dados_biometricos)
         if form.is_valid():
@@ -322,6 +334,9 @@ def dadosbiometricos(request):
             novo_dado.data_registo = datetime(ano, mes, 1)
             novo_dado.save()
             return redirect('dadosbiometricos')
+        else:
+            print(form.errors)  # Verifica se há erros no formulário
+
     else:
         form = DadosBiometricosForm(instance=dados_biometricos)
 
@@ -336,6 +351,7 @@ def dadosbiometricos(request):
             'ano': ano,
             'mes': mes,
             'meses': meses,
+            'idade': idade,
         }
     )
 
@@ -359,6 +375,15 @@ def editardadosbiometricos(request, user_id):
         data_registo__year=ano,
         data_registo__month=mes,
     ).first()
+
+    # Calcular idade do utilizador
+    if request.user.data_nascimento:
+        hoje = date.today()
+        idade = hoje.year - request.user.data_nascimento.year - (
+            (hoje.month, hoje.day) < (request.user.data_nascimento.month, request.user.data_nascimento.day)
+        )
+    else:
+        idade = "Não informado"
 
     # Se nenhum dado for encontrado, cria um novo objeto para edição
     if not dadobiometrico:
@@ -418,6 +443,7 @@ def editardadosbiometricos(request, user_id):
             'media_semanal': media_semanal,
             'reservas': reservas,
             'assiduidade_url': reverse('verassiduidade', kwargs={'user_id': user_id}),
+            'idade': idade,
         },
     )
 
@@ -550,54 +576,49 @@ def reservas(request, treino_id):
         fechamento_reservas = inicio_treino - timedelta(hours=treino.reservas_horas_fecho)
 
         if now < abertura_reservas:
-            # Reservas ainda não abertas
-            contexto = {
-                'treino': treino,
-                'abertura_reservas': abertura_reservas,
-            }
+            contexto = {'treino': treino, 'abertura_reservas': abertura_reservas}
             return render(request, 'FC_RESERVAS/fcReservas_reservas_nao_abertas.html', contexto)
         else:
-            # Reservas já foram fechadas
-            contexto = {
-                'treino': treino,
-                'fechamento_reservas': fechamento_reservas,
-            }
+            contexto = {'treino': treino, 'fechamento_reservas': fechamento_reservas}
             return render(request, 'FC_RESERVAS/fcReservas_reservas_fechadas.html', contexto)
 
-    # VERIFICAR SE O TREINO JÁ PASSOU
     treino_inicio = timezone.make_aware(
         timezone.datetime.combine(treino.data_inicio, treino.hora_inicio)
     )
     if timezone.now() > treino_inicio:
         return render(request, 'FC_RESERVAS/fcReservas_tempo_passado.html', {'treino': treino})
 
-    # VERIFICAR SE O UTILIZADOR JÁ TEM RESERVA
-    reserva = Reservas.objects.filter(utilizador=request.user, treino=treino).first()
-    if reserva:
-        # CANCELAR A RESERVA E MOVER O PRIMEIRO DA LISTA DE ESPERA PARA O TREINO
-        reserva.delete()
-        primeiro_na_lista = ListaEspera.objects.filter(treino=treino).order_by('data_entrada').first()
-        if primeiro_na_lista:
-            Reservas.objects.create(utilizador=primeiro_na_lista.utilizador, treino=treino)
-            primeiro_na_lista.delete()
-        return redirect('calendario')
+    # VERIFICAR SE O UTILIZADOR JÁ TEM UMA RESERVA NO MESMO DIA
+    reserva_existente = Reservas.objects.filter(
+        utilizador=request.user,
+        treino__data_inicio=treino.data_inicio  # Verifica se já tem treino no mesmo dia
+    ).first()
+
+    if reserva_existente:
+        if reserva_existente.treino == treino:
+            # SE O USUÁRIO ESTÁ TENTANDO CANCELAR A MESMA RESERVA, CANCELAMOS
+            reserva_existente.delete()
+            primeiro_na_lista = ListaEspera.objects.filter(treino=treino).order_by('data_entrada').first()
+            if primeiro_na_lista:
+                Reservas.objects.create(utilizador=primeiro_na_lista.utilizador, treino=treino)
+                primeiro_na_lista.delete()
+            return redirect('calendario')
+        else:
+            # SE JÁ TIVER OUTRO TREINO NO MESMO DIA, BLOQUEAMOS A NOVA RESERVA
+            messages.error(request, "Não é permitido fazer mais do que uma reserva por dia.")
+            return redirect('calendario')
 
     # VERIFICAR SE O TREINO ESTÁ CHEIO
     if Reservas.objects.filter(treino=treino).count() >= treino.max_participantes:
-        # VERIFICAR SE A LISTA DE ESPERA ALCANÇOU O LIMITE
         if ListaEspera.objects.filter(treino=treino).count() >= treino.max_lista_espera:
             return render(request, 'lista_espera_full.html', {'treino': treino})
     
-        # ADICIONAR O UTILIZADOR À LISTA DE ESPERA, CASO ELE AINDA NÃO ESTEJA NELA
         ListaEspera.objects.get_or_create(utilizador=request.user, treino=treino)
-
         return render(request, 'reservas_lista_espera.html', {'treino': treino})
 
-    else:
-        # CASO O TREINO NÃO ESTEJA CHEIO, CRIAR UMA NOVA RESERVA
-        Reservas.objects.create(utilizador=request.user, treino=treino)
+    # CRIAR RESERVA
+    Reservas.objects.create(utilizador=request.user, treino=treino)
 
-    # REDIRECIONAR PARA O CALENDÁRIO APÓS A RESERVA
     return redirect('calendario')
 
 
@@ -663,7 +684,21 @@ def lista_espera_view(request, treino_id):
 
 
 
+@login_required
+def cancelar_lista_espera(request, treino_id):
+    if request.user.funcao != 'Ativo':
+        return redirect('acesso_negado')
+    
+    treino = get_object_or_404(Treino, id=treino_id)
+    lista_espera = ListaEspera.objects.filter(utilizador=request.user, treino=treino)
 
+    if lista_espera.exists():
+        lista_espera.delete()
+        messages.success(request, "Você saiu da lista de espera com sucesso.")
+    else:
+        messages.error(request, "Você não está na lista de espera para este treino.")
+
+    return redirect('reservas_detalhes', treino_id=treino.id)
 
 
 

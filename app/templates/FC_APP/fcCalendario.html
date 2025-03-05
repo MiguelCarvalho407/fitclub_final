@@ -5,6 +5,27 @@
 
 <link rel="stylesheet" href="{% static 'css/calendario.css' %}">
 
+{% if messages %}
+    <div class="message-container">
+        {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        // Esconde a mensagem após 5 segundos
+        setTimeout(function() {
+            document.querySelectorAll('.alert').forEach(function(msg) {
+                msg.style.transition = "opacity 0.5s ease"; // Animação suave
+                msg.style.opacity = "0"; // Torna invisível
+                setTimeout(() => msg.remove(), 500); // Remove do DOM após a animação
+            });
+        }, 5000);
+    </script>
+{% endif %}
+
 <div class="calendar-container">
     <div class="calendar-header">
         <button id="prev">◀</button>
@@ -63,6 +84,10 @@
             <div>
                 <strong>${treino.tipo_treino} (${treino.hora_inicio} - ${treino.hora_fim})</strong>
                 <button class="btn-ver-mais ${treino.user_reserved ? 'reservado' : ''}">Ver mais</button>
+                ${treino.user_reserved 
+                    ? `<a href="${treino.reservar_url}" class="cancelar-reserva">Cancelar Reserva</a>` 
+                    : ``
+                }
             </div>
 
             <div class="treino-detalhes hidden">

@@ -109,6 +109,21 @@ h1 {
     margin: 0 10px;
 }
 
+.barra{
+    display: flex;
+    justify-content: center;
+}
+
+.search-box {
+    width: 25%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    text-align: center;
+}
+
 
 @media (max-width: 600px) {
     .table {

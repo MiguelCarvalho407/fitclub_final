@@ -235,36 +235,78 @@ def clean_codigo_postal(self):
 
 
 class DadosBiometricosForm(forms.ModelForm):
+    altura = forms.IntegerField(
+        min_value=100, max_value=299,  # Altura entre 100 e 299 cm
+        widget=forms.NumberInput(attrs={'step': '1'}),
+        required=True
+    )
+    peso = forms.DecimalField(
+        max_digits=5, decimal_places=2,
+        widget=forms.NumberInput(attrs={'step': '0.01', 'readonly': 'readonly'}), required=False
+    )
+    massa_gorda = forms.DecimalField(
+        max_digits=5, decimal_places=2,
+        widget=forms.NumberInput(attrs={'step': '0.01', 'readonly': 'readonly'}), required=False
+    )
+    massa_muscular = forms.DecimalField(
+        max_digits=5, decimal_places=2,
+        widget=forms.NumberInput(attrs={'step': '0.01', 'readonly': 'readonly'}), required=False
+    )
+    agua = forms.DecimalField(
+        max_digits=5, decimal_places=2,
+        widget=forms.NumberInput(attrs={'step': '0.01', 'readonly': 'readonly'}), required=False
+    )
+    gordura_visceral = forms.DecimalField(
+        max_digits=5, decimal_places=2,
+        widget=forms.NumberInput(attrs={'step': '0.01', 'readonly': 'readonly'}), required=False
+    )
+    idade_biologica = forms.DecimalField(
+        max_digits=5, decimal_places=2,
+        widget=forms.NumberInput(attrs={'step': '1', 'readonly': 'readonly'}), required=False
+    )
+    nivel_fisico = forms.CharField(
+        widget=forms.TextInput(attrs={'readonly': 'readonly'}), required=False
+    )
+
+    def clean_altura(self):
+        altura = self.cleaned_data.get('altura')
+        if altura and (altura < 100 or altura > 299):  # Garante que tenha 3 dígitos
+            raise forms.ValidationError("A altura deve ter exatamente 3 dígitos (ex: 160 cm).")
+        return altura
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        decimal_fields = ['peso', 'massa_gorda', 'massa_muscular', 'agua', 'gordura_visceral', 'idade_biologica', 'nivel_fisico']
+        
+        for field in decimal_fields:
+            if cleaned_data.get(field) == '':
+                cleaned_data[field] = None  # Converte valores vazios para None
+        
+        return cleaned_data
+
     class Meta:
         model = Dados_biometricos
-        fields = ['idade', 'altura', 'peso', 'massa_gorda', 'massa_muscular', 'agua', 'gordura_visceral', 'idade_biologica', 'nivel_fisico']  # Removido 'imc'
+        fields = ['idade', 'altura', 'peso', 'massa_gorda', 'massa_muscular', 'agua', 'gordura_visceral', 'idade_biologica', 'nivel_fisico']
         widgets = {
             'idade': forms.NumberInput(attrs={'readonly': 'readonly'}),
-            'altura': forms.NumberInput(),
-            'peso': forms.NumberInput(),
-            'massa_gorda': forms.NumberInput(),
-            'massa_muscular': forms.NumberInput(),
-            'agua': forms.NumberInput(),
-            'gordura_visceral': forms.NumberInput(),
-            'idade_biologica': forms.NumberInput(),
-            'nivel_fisico': forms.NumberInput(),
         }
 
 
 class EditarDadosBiometricos(forms.ModelForm):
+    altura = forms.DecimalField(max_digits=5, decimal_places=2, widget=forms.NumberInput(attrs={'step': '0.01'}))
+    peso = forms.DecimalField(max_digits=5, decimal_places=2, widget=forms.NumberInput(attrs={'step': '0.01'}))
+    massa_gorda = forms.DecimalField(max_digits=5, decimal_places=2, widget=forms.NumberInput(attrs={'step': '0.01'}))
+    massa_muscular = forms.DecimalField(max_digits=5, decimal_places=2, widget=forms.NumberInput(attrs={'step': '0.01'}))
+    agua = forms.DecimalField(max_digits=5, decimal_places=2, widget=forms.NumberInput(attrs={'step': '0.01'}))
+    gordura_visceral = forms.DecimalField(max_digits=5, decimal_places=2, widget=forms.NumberInput(attrs={'step': '0.01'}))
+    idade_biologica = forms.DecimalField(max_digits=5, decimal_places=2, widget=forms.NumberInput(attrs={'step': '1'}))
+    nivel_fisico = forms.CharField(widget=forms.TextInput())
+
     class Meta:
         model = Dados_biometricos
-        fields = ['idade', 'altura', 'peso', 'massa_gorda', 'massa_muscular', 'agua', 'gordura_visceral', 'idade_biologica', 'nivel_fisico']  # Removido 'imc'
+        fields = ['idade', 'altura', 'peso', 'massa_gorda', 'massa_muscular', 'agua', 'gordura_visceral', 'idade_biologica', 'nivel_fisico']
         widgets = {
             'idade': forms.NumberInput(attrs={'readonly': 'readonly'}),
-            'altura': forms.NumberInput(),
-            'peso': forms.NumberInput(),
-            'massa_gorda': forms.NumberInput(),
-            'massa_muscular': forms.NumberInput(),
-            'agua': forms.NumberInput(),
-            'gordura_visceral': forms.NumberInput(),
-            'idade_biologica': forms.NumberInput(),
-            'nivel_fisico': forms.NumberInput(),
         }
 
 

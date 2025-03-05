@@ -4,6 +4,8 @@ from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
 from django.core.exceptions import ValidationError
+from datetime import date
+from decimal import Decimal
 
 
 class Utilizadores(AbstractUser):
@@ -107,6 +109,11 @@ class Utilizadores(AbstractUser):
         allowed_domains = ['gmail.com', 'yahoo.com', 'hotmail.com']
         if domain not in allowed_domains:
             raise ValidationError({'email': f"Domínio '{domain}' não é permitido."})
+        
+    @property
+    def idade(self):
+        hoje = date.today()
+        return hoje.year - self.data_nascimento.year - ((hoje.month, hoje.day) < (self.data_nascimento.month, self.data_nascimento.day))
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
@@ -121,24 +128,31 @@ class Utilizadores(AbstractUser):
 
 
 class Dados_biometricos(models.Model):
-    idade = models.CharField(max_length=2, null=True, blank=True)
-    altura = models.FloatField(null=True, blank=True)
-    peso = models.FloatField(null=True, blank=True)
-    imc = models.FloatField(null=True, blank=True, editable=False)
-    massa_gorda = models.CharField(max_length=5, null=True, blank=True)
-    massa_muscular = models.CharField(max_length=4, blank=True, null=True)
-    agua = models.CharField(max_length=4, null=True, blank=True)
-    gordura_visceral = models.CharField(max_length=4, null=True, blank=True)
-    idade_biologica = models.CharField(max_length=2, null=True, blank=True)
-    nivel_fisico = models.CharField(max_length=50, null=True, blank=True)
+    idade = models.IntegerField(null=True, blank=True)  # Inteiro para idade
+    altura = models.IntegerField(null=True, blank=True)  # Decimal para manter precisão
+    peso = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, default=None)
+    imc = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, editable=False, default=None)
+    massa_gorda = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, default=None)
+    massa_muscular = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, default=None)
+    agua = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, default=None)
+    gordura_visceral = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, default=None)
+    idade_biologica = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, default=None)
+    nivel_fisico = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, default=None)
 
     data_registo = models.DateField(auto_now_add=True)
     utilizador = models.ForeignKey(Utilizadores, on_delete=models.CASCADE)
 
+    def calcular_idade(self):
+        if self.utilizador.data_nascimento:
+            hoje = date.today()
+            nascimento = self.utilizador.data_nascimento
+            return hoje.year - nascimento.year - ((hoje.month, hoje.day) < (nascimento.month, nascimento.day))
+        return None
+
     def save(self, *args, **kwargs):
         # CALCULAR O IMC
         if self.altura and self.peso:
-            self.imc = round(self.peso / (self.altura / 100) ** 2, 2)  # CONVERTER A ALTURA DE CM PARA METROS
+            self.imc = round(self.peso / (Decimal(self.altura) / Decimal(100)) ** 2, 2)  # CONVERTE ALTURA PARA METROS
         super().save(*args, **kwargs)
 
 
