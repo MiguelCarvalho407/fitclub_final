@@ -182,6 +182,7 @@ class InformacoesPessoaisForm(forms.ModelForm):
 
 
 
+
 class EditarInformacoesPessoaisForm(forms.ModelForm):
     is_staff = forms.ChoiceField(
         choices=[
@@ -264,8 +265,9 @@ class DadosBiometricosForm(forms.ModelForm):
         max_digits=5, decimal_places=2,
         widget=forms.NumberInput(attrs={'step': '1', 'readonly': 'readonly'}), required=False
     )
-    nivel_fisico = forms.CharField(
-        widget=forms.TextInput(attrs={'readonly': 'readonly'}), required=False
+    nivel_fisico = forms.DecimalField(
+        max_digits=5, decimal_places=2,
+        widget=forms.NumberInput(attrs={'step': '0.01', 'readonly': 'readonly'}), required=False
     )
 
     def clean_altura(self):
@@ -300,7 +302,7 @@ class EditarDadosBiometricos(forms.ModelForm):
     agua = forms.DecimalField(max_digits=5, decimal_places=2, widget=forms.NumberInput(attrs={'step': '0.01'}))
     gordura_visceral = forms.DecimalField(max_digits=5, decimal_places=2, widget=forms.NumberInput(attrs={'step': '0.01'}))
     idade_biologica = forms.DecimalField(max_digits=5, decimal_places=2, widget=forms.NumberInput(attrs={'step': '1'}))
-    nivel_fisico = forms.CharField(widget=forms.TextInput())
+    nivel_fisico = forms.DecimalField(max_digits=5, decimal_places=2, widget=forms.NumberInput(attrs={'step': '0.01'}))
 
     class Meta:
         model = Dados_biometricos

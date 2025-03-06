@@ -271,16 +271,23 @@ def criar_treinos(request):
 def definicoes(request):
     if request.user.funcao != 'Ativo':
         return redirect('acesso_negado')
-    
+
+    # Buscar ou criar automaticamente os dados biométricos do usuário
+    dados_biometricos, created = Dados_biometricos.objects.get_or_create(utilizador=request.user)
+
     if request.method == 'POST':
-        form = InformacoesPessoaisForm(request.POST or None, request.FILES or None, instance=request.user)
-        if form.is_valid():
+        form = InformacoesPessoaisForm(request.POST, request.FILES, instance=request.user)
+        biometria_form = DadosBiometricosForm(request.POST, instance=dados_biometricos)
+
+        if form.is_valid() and biometria_form.is_valid():
             form.save()
+            biometria_form.save()
             return redirect('calendario')
     else:
         form = InformacoesPessoaisForm(instance=request.user)
+        biometria_form = DadosBiometricosForm(instance=dados_biometricos)
 
-    return render(request, 'FC_APP/fcDefinicoes.html', {'form': form})
+    return render(request, 'FC_APP/fcDefinicoes.html', {'form': form, 'biometria_form': biometria_form})
 
 @login_required
 def calendario(request):

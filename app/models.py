@@ -137,7 +137,7 @@ class Dados_biometricos(models.Model):
     agua = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     gordura_visceral = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     idade_biologica = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    nivel_fisico = models.CharField(max_length=50, null=True, blank=True)
+    nivel_fisico = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
 
     data_registo = models.DateField(auto_now_add=True)
     utilizador = models.ForeignKey(Utilizadores, on_delete=models.CASCADE)
