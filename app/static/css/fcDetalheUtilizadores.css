@@ -80,6 +80,17 @@ body {
     transition: all 0.3s ease;
 }
 
+.btn-apagar-conta{
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #fff;
+    background-color: red;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
 .btn-voltar {
     text-decoration: none;
     padding: 10px 20px;
@@ -118,18 +129,23 @@ body {
     }
 
     .button-group {
-        flex-direction: column; /* Empilha os botões na vertical */
-        align-items: center; /* Centraliza os botões na tela */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
     }
 
-    .button-group a {
-        width: 100%; /* Garante que os botões ocupem toda a largura disponível */
-        max-width: none; /* Remove o limite máximo de largura */
-        margin-bottom: -5px; /* Adiciona espaçamento entre os botões */
+    .button-group a,
+    .button-group form {
+        width: 100%;
+        max-width: none;
+        margin-bottom: -5px;
     }
 
-    .button-group a:last-child {
-        margin-bottom: 0; /* Remove a margem inferior do último botão */
+    .btn-apagar-conta {
+        width: 100%;
+        display: block;
+        text-align: left;
     }
 
 }

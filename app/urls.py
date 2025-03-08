@@ -16,6 +16,7 @@ urlpatterns = [
 
     path('fitclub/membros/', views.membros, name='membros'),
     path('fitclub/utilizador/<int:user_id>/', views.detalhe_utilizador, name='detalhe_utilizador'),
+    path('fitclub/apagarconta/<int:user_id>/', views.apagarconta, name='apagarconta'),
 
     path('fitclub/definicoes/', views.definicoes, name='definicoes'),
     path('fitclub/recordes/', views.recordes, name='recordes'),

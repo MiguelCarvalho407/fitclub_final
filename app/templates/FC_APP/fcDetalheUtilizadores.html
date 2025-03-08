@@ -3,6 +3,7 @@
 
 {% block content %}
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link rel="stylesheet" href="{% static 'css/fcDetalheUtilizadores.css' %}">
 
 <div class="user-info-container">
@@ -89,9 +90,41 @@
             <a href="{% url 'editardadosbiometricos' perfil.id %}" class="btn-secondary">Dados Biométricos</a>
             <a href="{% url 'ver_recordes_utilizador' perfil.id %}" class="btn-recordes">Recordes</a>
             <a href="{% url 'verassiduidade' perfil.id %}" class="btn-assiduidade">Assiduidade</a>
+
+            <form method="POST" action="{% url 'apagarconta' perfil.id %}" class="remover-form">
+                {% csrf_token %}
+                <button type="button" class="btn-apagar-conta remover-utilizador-btn">Apagar Conta</button>
+            </form>
         {% endif %}
         <a href="{% url 'membros' %}" class="btn-voltar">Voltar à Lista</a>
     </div>
 </div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const removerBotoes = document.querySelectorAll(".remover-utilizador-btn");
+
+        removerBotoes.forEach(botao => {
+            botao.addEventListener("click", function() {
+                Swal.fire({
+                    title: "Confirmar?",
+                    text: "Esta ação excluirá a conta permanentemente!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Sim, excluir!",
+                    cancelButtonText: "Cancelar"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.closest(".remover-form").submit();
+                    }
+                });
+            });
+        });
+    });
+</script>
+
 
 {% endblock %}

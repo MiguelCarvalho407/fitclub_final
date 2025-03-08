@@ -13,22 +13,23 @@
         {% for reserva in reservas %}
             <li class="reserva-item">
                 <div class="utilizador-info">
-                    <strong>{{ reserva.utilizador.username }}</strong> 
+                    <strong>{{ reserva.utilizador.username }}</strong>
                     {% if reserva.confirmado == True %}
                         <span class="status-text presente-text">- Presente</span>
                     {% elif reserva.confirmado == False %}
                         <span class="status-text ausente-text">- Ausente</span>
                     {% else %}
-                        <span class="status-text pendente-text">- Pendente</span>
+                        <span class="status-text pendente-text">- Inscrito</span>
                     {% endif %}
                 </div>
                 
                 {% if request.user.is_staff %}
-                    <form method="POST" action="{% url 'reservas_detalhes' treino_id=treino.id %}">
+                    <form method="POST" action="{% url 'reservas_detalhes' treino_id=treino.id %}" class="remover-form">
                         {% csrf_token %}
                         <input type="hidden" name="reservas_id" value="{{ reserva.id }}">
                         <button type="submit" name="action" value="presente" class="presente-btn">Presente</button>
                         <button type="submit" name="action" value="ausente" class="ausente-btn">Ausente</button>
+                        <button type="button" class="remover-btn remover-utilizador-btn">Remover</button>
                     </form>
                 {% endif %}
             </li>
@@ -44,11 +45,13 @@
                 <div class="utilizador-info">
                     <strong>{{ espera.utilizador.username }}:</strong> A aguardar!
                 </div>
-
-                {% if espera.utilizador == request.user %}
-                    <button class="btn-sair-lista-espera" onclick="confirmarCancelamento('{{ treino.id }}')">
-                        Sair da Lista de Espera
-                    </button>
+                
+                {% if request.user.is_staff %}
+                    <form method="POST" action="{% url 'reservas_detalhes' treino_id=treino.id %}" class="remover-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="espera_id" value="{{ espera.id }}">
+                        <button type="button" class="remover-btn remover-utilizador-btn">Remover</button>
+                    </form>
                 {% endif %}
             </li>
         {% empty %}
@@ -64,24 +67,29 @@
     </div>
 </div>
 
-<!-- Script para o popup -->
 <script>
-function confirmarCancelamento(treinoId) {
-    Swal.fire({
-        title: "Tem certeza?",
-        text: "Deseja sair da lista de espera?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
-        confirmButtonText: "Sim, sair!",
-        cancelButtonText: "Cancelar"
-    }).then((result) => {
-        if (result.isConfirmed) {
-            window.location.href = `/sairlistaespera/${treinoId}/`;
-        }
+    document.addEventListener("DOMContentLoaded", function() {
+        const removerBotoes = document.querySelectorAll(".remover-utilizador-btn");
+
+        removerBotoes.forEach(botao => {
+            botao.addEventListener("click", function() {
+                Swal.fire({
+                    title: "Confirmar?",
+                    text: "Esta ação removerá o aluno.",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Sim, remover!",
+                    cancelButtonText: "Cancelar"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.closest(".remover-form").submit();
+                    }
+                });
+            });
+        });
     });
-}
 </script>
 
 {% endblock %}

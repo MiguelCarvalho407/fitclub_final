@@ -263,31 +263,23 @@ def criar_treinos(request):
 
 
 
-
-
-
-
 @login_required
 def definicoes(request):
     if request.user.funcao != 'Ativo':
         return redirect('acesso_negado')
 
-    # Buscar ou criar automaticamente os dados biométricos do usuário
-    dados_biometricos, created = Dados_biometricos.objects.get_or_create(utilizador=request.user)
-
     if request.method == 'POST':
         form = InformacoesPessoaisForm(request.POST, request.FILES, instance=request.user)
-        biometria_form = DadosBiometricosForm(request.POST, instance=dados_biometricos)
 
-        if form.is_valid() and biometria_form.is_valid():
+        if form.is_valid():
             form.save()
-            biometria_form.save()
             return redirect('calendario')
     else:
         form = InformacoesPessoaisForm(instance=request.user)
-        biometria_form = DadosBiometricosForm(instance=dados_biometricos)
 
-    return render(request, 'FC_APP/fcDefinicoes.html', {'form': form, 'biometria_form': biometria_form})
+    return render(request, 'FC_APP/fcDefinicoes.html', {'form': form})
+
+
 
 @login_required
 def calendario(request):
@@ -525,6 +517,18 @@ def editar_utilizador(request, user_id):
     return render(request, 'FC_APP/fcEditarUtilizador.html', {'form': form, 'utilizador': utilizador})
 
 
+@login_required
+def apagarconta(request, user_id):
+    if not request.user.is_staff:
+        return render(request, 'ERRORS/403.html')
+    
+    user = get_object_or_404(Utilizadores, id=user_id)
+    
+    if request.user == user:
+        return redirect('membros')
+
+    user.delete()
+    return redirect('membros')  # Redireciona para a lista de membros
 
 
 
@@ -752,40 +756,41 @@ def reservas_detalhes(request, treino_id):
     lista_espera = ListaEspera.objects.filter(treino=treino).order_by('data_entrada')
 
     if request.method == 'POST':
-        reservas_id = request.POST.get('reservas_id')
-        reserva = get_object_or_404(Reservas, id=reservas_id)
         action = request.POST.get('action')
 
-        if action == 'presente':
-            reserva.confirmado = True  # Usuário está presente
+        if action == 'presente' or action == 'ausente':
+            reservas_id = request.POST.get('reservas_id')
+            reserva = get_object_or_404(Reservas, id=reservas_id)
+            reserva.confirmado = True if action == 'presente' else False
             reserva.save()
-        elif action == 'ausente':
-            reserva.confirmado = False  # Usuário está ausente
-            reserva.save()
+            if action == 'ausente':
+                send_mail(
+                    "FitClub - Ausência no Treino",
+                    f"""Olá {reserva.utilizador.username},
 
-            # Enviar e-mail ao usuário informando a ausência
-            assunto = "FitClub - Ausência no Treino"
-            mensagem = f"""
-            Olá {reserva.utilizador.username},
+                    Marcaste reserva para o treino do dia {reserva.treino.data_inicio} às {reserva.treino.hora_inicio} mas não compareceste no mesmo.
 
-            Marcaste reserva para o treino do dia {reserva.treino.data_inicio} às {reserva.treino.hora_inicio} mas não compareceste no mesmo.
+                    Não te esqueças de pagar a taxa de ausência até ao próximo treino!
 
-            Não te esqueças de pagar a taxa de ausência até ao próximo treino!
+                    Com os melhores cumprimentos,  
+                    Equipa FitClub
+                    """,
+                    [reserva.utilizador.email],
+                    fail_silently=False
+                )
+                messages.success(request, f"E-mail enviado para {reserva.utilizador.email} notificando ausência.")
 
-            Com os melhores cumprimentos,  
-            Equipa FitClub
-            """
-            
-            remetente = "miguelcarvalho407@gmail.com"  # Altere para o seu e-mail configurado no Django
-            destinatario = [reserva.utilizador.email]
+        elif action == 'remover_reserva':
+            reservas_id = request.POST.get('reservas_id')
+            reserva = get_object_or_404(Reservas, id=reservas_id)
+            reserva.delete()
+            messages.success(request, "Reserva removida com sucesso!")
 
-            send_mail(assunto, mensagem, remetente, destinatario, fail_silently=False)
-
-            messages.success(request, f"E-mail enviado para {reserva.utilizador.email} notificando ausência.")
-
-        else:
-            reserva.confirmado = None
-            reserva.save()
+        elif action == 'remover_espera':
+            espera_id = request.POST.get('espera_id')
+            espera = get_object_or_404(ListaEspera, id=espera_id)
+            espera.delete()
+            messages.success(request, "Usuário removido da lista de espera!")
 
         return redirect('reservas_detalhes', treino_id=treino.id)
 
