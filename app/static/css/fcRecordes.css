@@ -191,6 +191,16 @@ table tbody tr:hover {
     justify-content: center;
 }
 
+.btn-apagar-recorde {
+    background-color: red; /* Cor vermelha */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 3px;
+}
+
 /* Responsividade */
 @media (max-width: 768px) {
     table th, table td {

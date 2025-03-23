@@ -5,6 +5,8 @@
 
 <link rel="stylesheet" href="{% static 'css/fcRecordes.css' %}">
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <div class="container">
     <h1>Criar Recorde</h1>
 
@@ -78,6 +80,7 @@
                         <th>Recorde</th>
                         <th>Valor</th>
                         <th>Data Recorde</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -92,6 +95,12 @@
                         </td>
                         <td>{{ recorde.valor }}</td>
                         <td>{{ recorde.data_do_recorde|date:"d/m/Y" }}</td>
+                        <td>
+                            <form action="{% url 'apagar_recorde' recorde.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-apagar-recorde">Apagar</button>
+                            </form>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

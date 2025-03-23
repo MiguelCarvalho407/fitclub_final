@@ -20,6 +20,7 @@ urlpatterns = [
 
     path('fitclub/definicoes/', views.definicoes, name='definicoes'),
     path('fitclub/recordes/', views.recordes, name='recordes'),
+    path('fitclub/recordes/apagar/<int:recorde_id>/', views.apagar_recorde, name='apagar_recorde'),
     path('fitclub/criarnomerecordes/', views.criarnomerecordes, name='criarnomerecordes'),
     path('fitclub/dadosbiometricos/', views.dadosbiometricos, name='dadosbiometricos'),
     path('fitclub/utilizador/<int:user_id>/editar/', views.editar_utilizador, name='editar_utilizador'),

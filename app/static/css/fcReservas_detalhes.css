@@ -294,4 +294,9 @@ h3 {
         width: 100%;
         margin-bottom: 10px; /* Espaço entre os links */
     }
+
+    .remover-btn{
+        margin-top: 5%;
+    }
+
 }

@@ -647,11 +647,21 @@ def reservas(request, treino_id):
             messages.error(request, "Não é permitido fazer mais do que uma reserva por dia.")
             return redirect('calendario')
 
+    # 🚀 NOVA VERIFICAÇÃO: IMPEDIR RESERVA SE O UTILIZADOR ESTIVER NA LISTA DE ESPERA DE OUTRO TREINO
+    espera_existente = ListaEspera.objects.filter(
+        utilizador=request.user,
+        treino__data_inicio=treino.data_inicio
+    ).exclude(treino=treino).exists()  # Verifica se está em lista de espera de outro treino
+
+    if espera_existente:
+        messages.error(request, "Não podes reservar esta aula pois já estás na lista de espera de outra.")
+        return redirect('calendario')
+
     # VERIFICAR SE O TREINO ESTÁ CHEIO
     if Reservas.objects.filter(treino=treino).count() >= treino.max_participantes:
         if ListaEspera.objects.filter(treino=treino).count() >= treino.max_lista_espera:
             return render(request, 'lista_espera_full.html', {'treino': treino})
-    
+
         ListaEspera.objects.get_or_create(utilizador=request.user, treino=treino)
         return render(request, 'reservas_lista_espera.html', {'treino': treino})
 
@@ -670,37 +680,47 @@ def reservas(request, treino_id):
 def adicionar_utilizador_treino(request, treino_id):
     if request.user.funcao != 'Ativo':
         return redirect('acesso_negado')
-    
+
     if not request.user.is_staff:
         return render(request, 'ERRORS/403.html')
-        
+
     treino = get_object_or_404(Treino, id=treino_id)
+
+    # Contar o número de reservas confirmadas e de pessoas na lista de espera
+    reservas_confirmadas = Reservas.objects.filter(treino=treino).count()
+    pessoas_em_espera = ListaEspera.objects.filter(treino=treino).count()
 
     if request.method == 'POST':
         usuario_id = request.POST.get('usuario_id')
         usuario = get_object_or_404(Utilizadores, id=usuario_id)
-        
-        # Verifica se já existe uma reserva para este utilizador e treino
-        reserva, created = Reservas.objects.get_or_create(
-            utilizador=usuario,
-            treino=treino,
-            defaults={'confirmado': None}  # Define a reserva como confirmada
-        )
-        
-        if not created:
-            # Caso já exista a reserva, garantimos que a confirmação seja False
-            reserva.confirmado = False
-            reserva.save()
-        
-        # Redireciona de volta para a página de detalhes do treino
+
+        # Se houver vagas, adiciona o utilizador ao treino
+        if reservas_confirmadas < treino.max_participantes:
+            reserva, created = Reservas.objects.get_or_create(
+                utilizador=usuario,
+                treino=treino,
+                defaults={'confirmado': None}  # Reserva confirmada diretamente
+            )
+            messages.success(request, f"{usuario.username} foi adicionado ao treino.")
+        else:
+            # Se não houver vagas, verifica se a lista de espera está cheia
+            if pessoas_em_espera >= treino.max_lista_espera:
+                messages.error(request, f"A lista de espera está cheia! {usuario.username} não pode ser adicionado.")
+            else:
+                ListaEspera.objects.get_or_create(utilizador=usuario, treino=treino)
+                messages.info(request, f"O treino está cheio. {usuario.username} foi adicionado à lista de espera.")
+
         return redirect('reservas_detalhes', treino_id=treino.id)
-    
-    # Recupera os utilizadores que já tem uma reserva e os exclui da lista de utilizadores disponíveis
+
+    # Excluir usuários que já estão no treino ou na lista de espera
     utilizadores_com_reserva = Reservas.objects.filter(treino=treino).values_list('utilizador_id', flat=True)
-    utilizadores_disponiveis = Utilizadores.objects.exclude(id__in=utilizadores_com_reserva)
-    
-    # Renderiza a página com a lista de utilizadores disponíveis
+    utilizadores_em_espera = ListaEspera.objects.filter(treino=treino).values_list('utilizador_id', flat=True)
+    utilizadores_excluidos = list(utilizadores_com_reserva) + list(utilizadores_em_espera)
+
+    utilizadores_disponiveis = Utilizadores.objects.exclude(id__in=utilizadores_excluidos)
+
     return render(request, 'adicionar_utilizador_treino.html', {'treino': treino, 'usuarios': utilizadores_disponiveis})
+
 
 
 
@@ -729,10 +749,18 @@ def cancelar_lista_espera(request, treino_id):
         return redirect('acesso_negado')
     
     treino = get_object_or_404(Treino, id=treino_id)
-    lista_espera = ListaEspera.objects.filter(utilizador=request.user, treino=treino)
 
-    if lista_espera.exists():
-        lista_espera.delete()
+    # Verificar se o usuário enviou um ID de espera válido
+    espera_id = request.POST.get("espera_id")
+
+    if espera_id:
+        lista_espera = ListaEspera.objects.filter(id=espera_id, treino=treino).first()
+
+        if lista_espera:
+            # Permitir que is_staff remova qualquer um e que o próprio usuário saia da lista
+            if request.user.is_staff or lista_espera.utilizador == request.user:
+                lista_espera.delete()
+
 
     return redirect('reservas_detalhes', treino_id=treino.id)
 
@@ -766,31 +794,29 @@ def reservas_detalhes(request, treino_id):
             if action == 'ausente':
                 send_mail(
                     "FitClub - Ausência no Treino",
-                    f"""Olá {reserva.utilizador.username},
-
-                    Marcaste reserva para o treino do dia {reserva.treino.data_inicio} às {reserva.treino.hora_inicio} mas não compareceste no mesmo.
-
-                    Não te esqueças de pagar a taxa de ausência até ao próximo treino!
-
-                    Com os melhores cumprimentos,  
-                    Equipa FitClub
-                    """,
-                    [reserva.utilizador.email],
-                    fail_silently=False
+                    f"Olá {reserva.utilizador.username},\n\n"
+                    f"Marcaste reserva para o treino do dia {reserva.treino.data_inicio} às {reserva.treino.hora_inicio} "
+                    f"mas não compareceste no mesmo.\n\n"
+                    f"Não te esqueças de pagar a taxa de ausência até ao próximo treino!\n\n"
+                    "Com os melhores cumprimentos,\n"
+                    "Equipa FitClub",
+                    from_email='miguelcarvalho407@gmail.com',
+                    recipient_list=[reserva.utilizador.email],
+                    fail_silently=False,
                 )
-                messages.success(request, f"E-mail enviado para {reserva.utilizador.email} notificando ausência.")
 
         elif action == 'remover_reserva':
             reservas_id = request.POST.get('reservas_id')
             reserva = get_object_or_404(Reservas, id=reservas_id)
             reserva.delete()
-            messages.success(request, "Reserva removida com sucesso!")
+
+            # 🔥 Após a remoção, chamar a função para promover da lista de espera
+            promover_lista_espera(treino)
 
         elif action == 'remover_espera':
             espera_id = request.POST.get('espera_id')
             espera = get_object_or_404(ListaEspera, id=espera_id)
             espera.delete()
-            messages.success(request, "Usuário removido da lista de espera!")
 
         return redirect('reservas_detalhes', treino_id=treino.id)
 
@@ -800,6 +826,29 @@ def reservas_detalhes(request, treino_id):
         {'treino': treino, 'reservas': reservas, 'lista_espera': lista_espera}
     )
 
+
+
+def promover_lista_espera(treino):
+    """Promove o primeiro da lista de espera para a reserva caso haja vaga disponível."""
+    primeiro_na_lista = ListaEspera.objects.filter(treino=treino).order_by('data_entrada').first()
+
+    if primeiro_na_lista:
+        # Criar a reserva para o primeiro da lista de espera
+        nova_reserva = Reservas.objects.create(utilizador=primeiro_na_lista.utilizador, treino=treino)
+        
+        # Remover da lista de espera
+        primeiro_na_lista.delete()
+
+        # Enviar email de notificação
+        send_mail(
+            subject=f"Reserva confirmada para o treino dia {treino.data_inicio.strftime('%d/%m/%Y')} às {treino.hora_inicio}",
+            message=f"Olá {nova_reserva.utilizador.username},\n\n"
+                    f"Alguém cancelou a reserva para o treino, e a tua reserva foi automaticamente confirmada.\n"
+                    f"O treino acontecerá no dia {treino.data_inicio.strftime('%d/%m/%Y')} às {treino.hora_inicio}.\n",
+            from_email='miguelcarvalho407@gmail.com',
+            recipient_list=[nova_reserva.utilizador.email],
+            fail_silently=False,
+        )
 
 
 
@@ -818,13 +867,11 @@ def enviar_email_reserva_lista_espera(sender, instance, created, **kwargs):
 
             # Envia o e-mail para o usuário promovido
             send_mail(
-                subject=f"Reserva confirmada para o treino de {data_treino} às {treino.hora_inicio}",
+                subject=f"Reserva confirmada para o treino dia {data_treino} às {treino.hora_inicio}",
                 message=(
                     f"Olá {primeiro_na_lista.utilizador.username},\n\n"
                     f"Alguém cancelou a reserva para o treino, e a tua reserva foi automaticamente confirmada.\n"
                     f"O treino acontecerá no dia {data_treino} às {treino.hora_inicio}.\n\n"
-                    f"Se não conseguires estar presente cancela a tua reserva no nosso website.\n\n"
-                    "Obrigado!"
                 ),
                 from_email='miguelcarvalho407@gmail.com',
                 recipient_list=[primeiro_na_lista.utilizador.email],
@@ -975,6 +1022,20 @@ def recordes(request):
     ]
 
     return render(request,'FC_APP/fcCriarRecorde.html',{'form': form,'recorde': recorde,'nomes_disponiveis': nomes_disponiveis,'predefinidos_disponiveis': predefinidos_disponiveis,'opcoes_filtro': opcoes_filtro,'query': query})
+
+
+
+
+@login_required
+def apagar_recorde(request, recorde_id):
+    if request.user.funcao != 'Ativo':
+        return redirect('acesso_negado')
+
+    recorde = get_object_or_404(Recordes, id=recorde_id)
+    
+    if request.method == 'POST':
+        recorde.delete()
+        return redirect('recordes')
 
 
 
